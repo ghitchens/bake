@@ -33,7 +33,8 @@ defmodule Bake.Mixfile do
       {:poison, "~> 1.5.0"},
       {:exrm, "~> 0.19.8"},
       {:git_cli, "~> 0.1.0"},
-      {:sshex, "~> 1.3"}
+      {:sshex, "~> 1.3"},
+      {:bake_utils, path: "../bake_utils"}
     ]
   end
 end

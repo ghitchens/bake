@@ -4,8 +4,6 @@ defmodule Bake.Cli.Config do
 
   end
 
-  alias Bake.Utils
-
   def read do
     case File.read(config_path()) do
       {:ok, binary} ->
@@ -33,7 +31,7 @@ defmodule Bake.Cli.Config do
   end
 
   defp config_path do
-    Path.join(Utils.bake_home(), "bake.config")
+    Path.join(BakeUtils.bake_home(), "bake.config")
   end
 
   defp encode_term(list) do

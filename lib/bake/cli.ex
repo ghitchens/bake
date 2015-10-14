@@ -9,6 +9,7 @@ defmodule Bake.Cli do
     """
       bake    - Bake firmware for a --target or --all targets
       user    - User management commands
+      daemon  - Control the local bake daemon
       system  - Target system options
       burn    - Install language helper functions
     """
@@ -20,6 +21,7 @@ defmodule Bake.Cli do
       ["user" | cmd] -> Cli.User.main(cmd)
       ["system" | cmd] -> Cli.System.main(cmd)
       ["burn" | cmd] -> Cli.Burn.main(cmd)
+      ["daemon" | cmd] -> Cli.Daemon.main(cmd)
       _ -> bake(args)
     end
   end

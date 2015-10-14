@@ -2,25 +2,6 @@ defmodule Bake.Utils do
 
   require Logger
 
-  @working_dir File.cwd! <> "/_bake"
-  @bake_home "~/.bake"
-
-  def create_working_dir do
-    File.mkdir @working_dir
-  end
-
-  def working_dir do
-    @working_dir
-  end
-
-  def bake_home do
-    Path.expand(System.get_env("BAKE_HOME") || @bake_home)
-  end
-
-  def oven_dir do
-    bake_home <> "/oven"
-  end
-
   def print_response_result(%{body: body, status_code: status_code}) do
     case Poison.decode(body) do
       {:ok, %{"errors" => errors}} ->

@@ -3,10 +3,10 @@ use Bake.Config
 platform :nerves
 
 target :bbb,
-  recipe: "bbb_default"
+  recipe: "nerves/bbb"
 
 target :rpi,
-  recipe: "rpi_default"
+  recipe: "nerves/rpi"
 
 target :rpi2,
-  recipe: "rpi2_default"
+  recipe: "nerves/rpi2"
