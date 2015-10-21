@@ -31,9 +31,22 @@ defmodule Bake.Config do
         {_, agent} -> get_config_and_stop_agent(agent)
         nil        -> config
       end
-      config
+      {:ok, config}
     rescue
-      e -> nil
+      e -> {:error, e}
+    end
+  end
+
+  def filter_target(config, {:all}), do: config
+  def filter_target(config, target) do
+    target_config = (config[:target] || [])
+      |> Keyword.take([String.to_atom(target)])
+    case target_config do
+      [] -> []
+      target_config ->
+        config
+          |> Keyword.delete(:target)
+          |> Keyword.merge([target: target_config])
     end
   end
 

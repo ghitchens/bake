@@ -19,7 +19,6 @@ defmodule Bake.Cli.Daemon do
       ["stop"] -> stop
       ["running"] -> running
       _ -> invalid_cmd(cmd)
-
     end
   end
 

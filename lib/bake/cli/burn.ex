@@ -1,6 +1,5 @@
 defmodule Bake.Cli.Burn do
   use Bake.Cli.Menu
-  alias Bake.Utils
 
   @switches []
 

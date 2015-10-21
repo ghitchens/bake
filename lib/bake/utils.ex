@@ -2,6 +2,14 @@ defmodule Bake.Utils do
 
   require Logger
 
+  def download_file(url) do
+    HTTPoison.request(
+      :get,
+      url,
+      []
+    )
+  end
+
   def print_response_result(%{body: body, status_code: status_code}) do
     case Poison.decode(body) do
       {:ok, %{"errors" => errors}} ->

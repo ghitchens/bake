@@ -1,10 +1,12 @@
 defmodule Bake.Compiler.System do
+  require Logger
 
-  def fetch(config) do
-    
+  def compile(config) do
+    Logger.debug "System Compile Config: #{inspect config}"
+
   end
 
-  defp load_local(config) do
+  def fetch(config) do
 
   end
 end

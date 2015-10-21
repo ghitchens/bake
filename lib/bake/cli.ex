@@ -7,11 +7,13 @@ defmodule Bake.Cli do
 
   def menu do
     """
-      bake    - Bake firmware for a --target or --all targets
-      user    - User management commands
-      daemon  - Control the local bake daemon
-      system  - Target system options
-      burn    - Install language helper functions
+      bake      - Bake firmware for a --target or --all targets
+      user      - User management commands
+      daemon    - Control the local bake daemon
+      toolchain - Toolchain options
+      system    - Target system options
+      firmware  - Target Firmware options
+      burn      - Install language helper functions
     """
   end
 
@@ -20,6 +22,7 @@ defmodule Bake.Cli do
     case args do
       ["user" | cmd] -> Cli.User.main(cmd)
       ["system" | cmd] -> Cli.System.main(cmd)
+      ["toolchain" | cmd] -> Cli.Toolchain.main(cmd)
       ["burn" | cmd] -> Cli.Burn.main(cmd)
       ["daemon" | cmd] -> Cli.Daemon.main(cmd)
       _ -> bake(args)

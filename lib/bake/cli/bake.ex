@@ -1,6 +1,5 @@
 defmodule Bake.Cli.Bake do
   use Bake.Cli.Menu
-  alias Bake.Utils
 
   @switches [file: :string, target: :string, all: :boolean]
 
