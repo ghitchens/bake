@@ -1,4 +1,4 @@
-defmodule Bake.Config do
+defmodule Bake.Toolchain.Config do
 
   require Logger
 
@@ -6,7 +6,7 @@ defmodule Bake.Config do
 
   defmacro __using__(_opts) do
     quote do
-      import Bake.Config, only: [platform: 1, target: 2]
+      import Bake.Toolchain.Config, only: [platform: 1, target: 2]
       {:ok, agent} = Bake.Config.Agent.start_link
       var!(config_agent, Bake.Config) = agent
     end
@@ -51,4 +51,7 @@ defmodule Bake.Config do
           |> Keyword.merge([target: target_config])
     end
   end
+
+
+
 end

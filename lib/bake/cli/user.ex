@@ -47,7 +47,7 @@ defmodule Bake.Cli.User do
   end
 
   defp whoami do
-    config = Bake.Cli.Config.read
+    config = BakeUtils.Cli.Config.read
     username = local_user(config)
     Bake.Shell.info(username)
   end
@@ -68,9 +68,9 @@ defmodule Bake.Cli.User do
   end
 
   defp test do
-    config = Bake.Cli.Config.read
+    config = BakeUtils.Cli.Config.read
     username = local_user(config)
-    auth = Utils.auth_info(config)
+    auth = BakeUtils.auth_info(config)
 
     case Bake.Api.User.get(username, auth) do
       {:ok, %{status_code: status_code}} when status_code in 200..299 ->
@@ -93,25 +93,15 @@ defmodule Bake.Cli.User do
   end
 
   defp deauth() do
-    config = Bake.Cli.Config.read
-    username = local_user(config)
+    config = BakeUtils.Cli.Config.read
+    username = BakeUtils.local_user(config)
 
     config
     |> Keyword.drop([:username, :key])
-    |> Bake.Cli.Config.write
+    |> BakeUtils.Cli.Config.write
 
     Bake.Shell.info "User `" <> username <> "` removed from the local machine. " <>
                    "To authenticate again, run `bake user auth` " <>
                    "or create a new user with `bake user register`"
-  end
-
-  defp local_user(config) do
-    case Keyword.fetch(config, :username) do
-      {:ok, username} ->
-        username
-      :error ->
-        raise Bake.Error, message: "No user authorised on the local machine. Run `bake user auth` " <>
-                  "or create a new user with `bake user register`"
-    end
   end
 end

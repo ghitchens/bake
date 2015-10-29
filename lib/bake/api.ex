@@ -5,7 +5,8 @@ defmodule Bake.Api do
     default_headers = [
       "Content-Type": "application/json",
       "User-Agent": user_agent,
-      "x-bake-host-arch": BakeUtils.host_arch
+      "x-bake-host-arch": BakeUtils.host_arch,
+      "x-bake-host-platform": BakeUtils.host_platform
     ]
     headers = Keyword.merge(default_headers, headers)
     HTTPoison.request(

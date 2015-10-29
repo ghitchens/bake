@@ -56,20 +56,12 @@ defmodule Bake.Utils do
         key = Poison.decode!(body)
           |> Map.get("data")
           |> Map.get("key")
-        Bake.Cli.Config.update(username: username, key: key)
+        BakeUtils.Cli.Config.update(username: username, key: key)
         :ok
       {_, response} ->
         Bake.Shell.error("API key generation failed")
         Bake.Utils.print_response_result(response)
         :error
-    end
-  end
-
-  def auth_info(config \\ Bake.Config.read) do
-    if key = config[:key] do
-      [key: key]
-    else
-      Mix.raise "No authorized user found. Run 'mix bake.user auth'"
     end
   end
 

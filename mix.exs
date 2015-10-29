@@ -34,7 +34,8 @@ defmodule Bake.Mixfile do
       {:exrm, "~> 0.19.8"},
       {:git_cli, "~> 0.1.0"},
       {:sshex, "~> 1.3"},
-      {:bake_utils, path: "../bake_utils"}
+      {:bake_utils, path: "../bake_utils"},
+      {:porcelain, "~> 2.0"}
     ]
   end
 end

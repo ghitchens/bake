@@ -21,6 +21,6 @@ defmodule Bake.Config.Agent do
 
   @spec merge(pid, config) :: config
   def merge(agent, new_config) do
-    Agent.update(agent, &Bake.Config.merge(&1, new_config))
+    Agent.update(agent, &Bake.Config.Utils.merge(&1, new_config))
   end
 end
