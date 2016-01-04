@@ -2,6 +2,17 @@ defmodule Bake.Utils do
 
   require Logger
 
+  @cli_version Mix.Project.config[:version]
+  @escript_path Mix.Project.config[:escript][:path]
+
+  def cli_version do
+    @cli_version
+  end
+
+  def escript_path do
+    @escript_path
+  end
+
   def download_file(url) do
     HTTPoison.request(
       :get,

@@ -48,7 +48,7 @@ defmodule Bake.Cli.User do
 
   defp whoami do
     config = BakeUtils.Cli.Config.read
-    username = local_user(config)
+    username = BakeUtils.local_user(config)
     Bake.Shell.info(username)
   end
 
@@ -69,7 +69,7 @@ defmodule Bake.Cli.User do
 
   defp test do
     config = BakeUtils.Cli.Config.read
-    username = local_user(config)
+    username = BakeUtils.local_user(config)
     auth = BakeUtils.auth_info(config)
 
     case Bake.Api.User.get(username, auth) do

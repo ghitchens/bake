@@ -1,20 +1,47 @@
 defmodule Bake.Api do
   require Logger
 
+  @timeout 60_000
+
   def request(method, url, headers, body \\ "") do
     default_headers = [
-      "Content-Type": "application/json",
       "User-Agent": user_agent,
       "x-bake-host-arch": BakeUtils.host_arch,
-      "x-bake-host-platform": BakeUtils.host_platform
+      "x-bake-host-platform": BakeUtils.host_platform,
+      "x-bake-version": Bake.Utils.cli_version
     ]
     headers = Keyword.merge(default_headers, headers)
+    {body, headers} = encoding(body, headers)
     HTTPoison.request(
       method,
       url,
-      Poison.encode!(body),
-      headers
-    )
+      body,
+      headers,
+      timeout: @timeout
+    ) |> response
+  end
+
+  def response({:ok, %{headers: headers}} = response) do
+    update = headers["x-bake-update"]
+    if update != nil do
+      Bake.Shell.info "A new version of Bake is available: #{update}"
+      Bake.Shell.info "You can update by running: bake update"
+    end
+    response
+  end
+
+  def encoding("", headers), do: {"", headers}
+  def encoding(body, headers) do
+    try do
+      case Poison.encode(body) do
+        {:ok, payload} ->
+          {payload, Keyword.merge(headers, ["Content-Type": "application/json"])}
+        _ ->
+          {body, headers}
+      end
+    rescue
+      e -> {body, headers}
+    end
   end
 
   def url(path) do

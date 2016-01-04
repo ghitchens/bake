@@ -15,7 +15,7 @@ defmodule Bake.Mixfile do
   #
   # Type "mix help compile.app" for more information
   def application do
-    [applications: [:logger, :httpoison, :poison, :crypto, :ssl, :ssh, :sshex, :mix, :conform]]
+    [applications: [:logger, :httpoison, :poison, :crypto, :ssl, :ssh, :sshex, :mix, :conform, :porcelain]]
   end
 
   # Dependencies can be Hex packages:

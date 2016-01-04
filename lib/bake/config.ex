@@ -1,8 +1,9 @@
 defmodule Bake.Config do
+  use Bake.Config.Utils
 
   require Logger
 
-  import Bake.Config.Utils
+
 
   defmacro __using__(_opts) do
     quote do
@@ -26,18 +27,7 @@ defmodule Bake.Config do
     end
   end
 
-  def read!(file) do
-    try do
-      {config, binding} = Code.eval_file(file)
-      config = case List.keyfind(binding, {:config_agent, Bake.Config}, 0) do
-        {_, agent} -> get_config_and_stop_agent(agent)
-        nil        -> config
-      end
-      {:ok, config}
-    rescue
-      e -> {:error, e}
-    end
-  end
+
 
   def filter_target(config, {:all}), do: config
   def filter_target(config, target) do

@@ -1,0 +1,1 @@
+%{"bbb": {"nerves/bbb", "0.0.1"}, "rpi2": {"nerves/rpi2", "0.0.1"}}
