@@ -19,12 +19,14 @@ defmodule Bake.Api do
       url,
       body,
       headers,
-      timeout: @timeout
+      timeout: @timeout,
+      recv_timeout: @timeout
     ) |> response
   end
 
   def response({:ok, %{headers: headers}} = response) do
-    update = headers["x-bake-update"]
+    update = headers["x-bake-update"] || headers["X-Bake-Update"]
+    Logger.debug "headers: #{inspect headers}"
     if update != nil do
       Bake.Shell.info "A new version of Bake is available: #{update}"
       Bake.Shell.info "You can update by running: bake update"

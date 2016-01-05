@@ -5,3 +5,5 @@ config :bakeware,
 
 config :bake,
   api_host: "https://bakeware.herokuapp.com/api"
+
+config :logger, level: :info

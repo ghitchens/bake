@@ -32,15 +32,13 @@ config :ex_aws, :httpoison_opts,
   recv_timeout: 60_000,
   hackney: [pool: false]
 
-config :bake, :ex_aws,
-  s3: [
-    scheme: "https://",
-    host: "s3.amazonaws.com",
-    region: "us-east-1"
-  ]
+config :ex_aws, :s3,
+  scheme: "http://",
+  host: "s3.amazonaws.com",
+  region: "us-east-1"
 
 config :ex_aws,
-  http_client: HTTPoison,
+  http_client: ExAws.Request.HTTPoison,
   access_key_id: [{:system, "BAKE_AWS_ACCESS_KEY_ID"}, :instance_role],
   secret_access_key: [{:system, "BAKE_AWS_SECRET_ACCESS_KEY"}, :instance_role]
 
