@@ -12,6 +12,8 @@ defmodule Bake.Api do
     ]
     headers = Keyword.merge(default_headers, headers)
     {body, headers} = encoding(body, headers)
+    Logger.debug "URL: #{inspect url}"
+
     HTTPoison.request(
       method,
       url,

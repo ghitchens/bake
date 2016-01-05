@@ -26,7 +26,6 @@ defmodule Bake.Cli.User do
       ["deauth"] -> deauth
       ["auth"] -> create_key(opts)
       _ -> invalid_cmd(cmd)
-
     end
   end
 

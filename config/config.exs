@@ -28,5 +28,20 @@ use Mix.Config
 # here (which is why it is important to import them last).
 #
 config :porcelain, driver: Porcelain.Driver.Basic
+config :ex_aws, :httpoison_opts,
+  recv_timeout: 60_000,
+  hackney: [pool: false]
+
+config :bake, :ex_aws,
+  s3: [
+    scheme: "https://",
+    host: "s3.amazonaws.com",
+    region: "us-east-1"
+  ]
+
+config :ex_aws,
+  http_client: HTTPoison,
+  access_key_id: [{:system, "BAKE_AWS_ACCESS_KEY_ID"}, :instance_role],
+  secret_access_key: [{:system, "BAKE_AWS_SECRET_ACCESS_KEY"}, :instance_role]
 
 import_config "#{Mix.env}.exs"

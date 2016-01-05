@@ -5,7 +5,6 @@ defmodule Bake.Cli do
 
   @switches [version: :string]
 
-
   def menu do
     """
       daemon    - Control the local bake daemon
