@@ -1,8 +1,8 @@
-### Release Notes
+# Release Notes
 
-## Bake 0.0.2-dev
+### Bake 0.0.2-dev
 
-# Enhancements
+## Enhancements
 
 * Added commands for system management
     * bake system get [—target [—all | target_name] —bakefile path/to/bakefile]
@@ -10,9 +10,9 @@
     * bake toolchain get [—target [—all | target_name] —bakefile path/to/bakefile]
 
 
-## Bake 0.0.1
+### Bake 0.0.1
 
-# Enhancements
+## Enhancements
 
 * Initial Release
 * Added commands for user management
