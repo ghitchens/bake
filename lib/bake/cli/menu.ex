@@ -17,6 +17,17 @@ defmodule Bake.Cli.Menu do
         Bake.Shell.info "Invalid #{mod} command - #{cmd}"
         Bake.Shell.info menu
       end
+
+      def check_target(opts) do
+        if opts[:target] == nil and opts[:all] == nil, do: raise """
+          You must specify a target to install a system for or pass --all to install systems for all targets
+        """
+        opts[:target] || {:all}
+      end
+
+      def check_bakefile(opts) do
+
+      end
     end
   end
 end

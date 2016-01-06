@@ -9,6 +9,7 @@ defmodule Bake.Cli.System do
   defp menu do
     """
       get       - Get a compiled system tar from bakeware.
+      clean     - Remove a local system from disk
     """
   end
 
@@ -22,16 +23,15 @@ defmodule Bake.Cli.System do
 
     case cmd do
       ["get"] -> get(opts)
+      ["clean"] -> clean(opts)
       _ -> invalid_cmd(cmd)
     end
   end
 
   defp get(opts) do
-    if opts[:target] == nil and opts[:all] == nil, do: raise """
-      You must specify a target to install a system for or pass --all to install systems for all targets
-    """
-    target = opts[:target] || {:all}
-    bakefile = opts[:file] || System.cwd! <> "/Bakefile"
+    target = check_target(opts)
+    bakefile = check_bakefile(opts)
+
     case Bake.Config.read!(bakefile) do
       {:ok, config} ->
         case Bake.Config.filter_target(config, target) do
@@ -80,6 +80,32 @@ defmodule Bake.Cli.System do
   defp get_resp({_, response}, _platform) do
     Bake.Shell.error("Failed to download system")
     Bake.Utils.print_response_result(response)
+  end
+
+  def clean(opts) do
+    target = check_target(opts)
+    bakefile = opts[:file] || System.cwd! <> "/Bakefile"
+    case Bake.Config.read!(bakefile) do
+      {:ok, config} ->
+        case Bake.Config.filter_target(config, target) do
+          [] -> Bake.Shell.info "Bakefile does not contain definition for target #{target}"
+          target_config ->
+            platform = target_config[:platform]
+              |> to_string
+              |> String.capitalize
+            mod = Module.concat("Elixir.Bake.Adapters", platform)
+
+            Enum.each(target_config[:target], fn({target, v}) ->
+              Bake.Shell.info "=> Cleaning system for target #{target}"
+              dir = mod.systems_path <> "/#{v[:recipe]}"
+              Bake.Shell.info "=>    Removing system #{v[:recipe]}"
+              File.rm_rf!(dir)
+            end)
+            Bake.Shell.info "=> Finished"
+        end
+      {:error, e} ->
+        Bake.Shell.info "No Bakefile Found"
+    end
   end
 
   # defp compile(opts) do
