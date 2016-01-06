@@ -54,7 +54,7 @@ defmodule Bake.Cli.System do
     end
   end
 
-  defp get_resp({:ok, %{body: body}}, platform) do
+  defp get_resp({:ok, %{status_code: code, body: body}}, platform) when code in 200..299 do
     %{data: %{path: path, host: host, name: name}} = Poison.decode!(body, keys: :atoms)
 
     username = String.split(path, "/")
@@ -74,6 +74,11 @@ defmodule Bake.Cli.System do
       {_, error} ->
         raise "Error downloading system: #{inspect error}"
     end
+  end
+  
+  defp get_resp({_, response}, _platform) do
+    Bake.Shell.error("Failed to download system")
+    Bake.Utils.print_response_result(response)
   end
 
   # defp compile(opts) do
