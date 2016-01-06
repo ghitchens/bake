@@ -40,7 +40,6 @@ defmodule Bake.Adapters.Nerves do
     toolchains = File.ls!(toolchains_path)
     toolchain_name = Enum.find(toolchains, &(String.starts_with?(&1, toolchain_name)))
     toolchain_path = "#{toolchains_path}/#{toolchain_name}"
-    Logger.debug "Toolchain Path: #{inspect toolchain_path}"
     if File.dir?(toolchain_path) do
       #Logger.debug "Toolchain #{toolchain_tuple} Found"
     else

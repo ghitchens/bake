@@ -1,7 +1,6 @@
 # Release Notes
 
-## Bake 0.0.2-dev
-
+## Bake 0.0.2
 ### Enhancements
 
 * Added commands for system management
@@ -11,7 +10,6 @@
 
 
 ## Bake 0.0.1
-
 ### Enhancements
 
 * Initial Release
