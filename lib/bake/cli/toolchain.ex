@@ -78,7 +78,7 @@ defmodule Bake.Cli.Toolchain do
     mod = opts[:mod]
 
     case Bake.Api.request(:get, host <> "/" <> path, []) do
-      {:ok, %{body: tar}} ->
+      {:ok, %{status_code: code, body: tar}} when code in 200..299 ->
         Bake.Shell.info "=> Toolchain #{username}/#{tuple} Downloaded"
         dir = mod.toolchains_path
         File.mkdir_p(dir)
@@ -87,8 +87,9 @@ defmodule Bake.Cli.Toolchain do
         System.cmd("tar", ["zxf", "#{tuple}.tar.gz"], cd: dir)
         File.rm!("#{dir}/#{tuple}.tar.gz")
 
-      {_, error} ->
-        Bake.Shell.error "Error downloading system: #{inspect error}"
+      {_, response} ->
+        Bake.Shell.error("Failed to download toolchain")
+        Bake.Utils.print_response_result(response)
     end
   end
 

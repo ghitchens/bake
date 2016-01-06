@@ -63,7 +63,7 @@ defmodule Bake.Cli.System do
     mod = opts[:mod]
 
     case Bake.Api.request(:get, host <> "/" <> path, []) do
-      {:ok, %{body: tar}} ->
+      {:ok, %{status_code: code, body: tar}} when code in 200..299 ->
         Bake.Shell.info "=> System #{username}/#{name} Downloaded"
         dir = mod.systems_path <> "/#{username}"
         File.mkdir_p(dir)
@@ -72,8 +72,9 @@ defmodule Bake.Cli.System do
         System.cmd("tar", ["zxf", "#{name}.tar.gz"], cd: dir)
         File.rm!("#{dir}/#{name}.tar.gz")
 
-      {_, error} ->
-        Bake.Shell.error "Error downloading system: #{inspect error}"
+      {_, response} ->
+        Bake.Shell.error("Failed to download system")
+        Bake.Utils.print_response_result(response)
     end
   end
 
