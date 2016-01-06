@@ -1,11 +1,10 @@
-defmodule Bake.Adapter.Nerves do
+defmodule Bake.Adapters.Nerves do
   @behaviour Bake.Adapter
+
+  @nerves_home System.get_env("NERVES_HOME") || "~/.nerves"
 
   require Logger
 
-  def system_get(config) do
-
-  end
   def systems_path, do: "#{@nerves_home}/systems/" |> Path.expand
   def toolchains_path, do: "#{@nerves_home}/toolchains/" |> Path.expand
 
@@ -18,9 +17,7 @@ defmodule Bake.Adapter.Nerves do
     # TODO: Need to get locked version from the bakefile.lock
 
     # Check to ensure that the system is available in NERVES_HOME
-    nerves_home = System.get_env("NERVES_HOME") || "~/.nerves"
-    system_path = "#{nerves_home}/systems/#{recipe}"
-    |> Path.expand
+    system_path = "#{systems_path}/#{recipe}"
     #Logger.debug "Path: #{inspect system_path}"
     if File.dir?(system_path) do
       #Logger.debug "System #{recipe} Found"
@@ -35,21 +32,19 @@ defmodule Bake.Adapter.Nerves do
 
     #Logger.debug "System Config: #{inspect system_config}"
     # Toolchain
-    {toolchain_tuple, _toolchain_version} = system_config[:toolchain]
+    {username, toolchain_tuple, _toolchain_version} = system_config[:toolchain]
+    host_platform = BakeUtils.host_platform
+    host_arch = BakeUtils.host_arch
+    toolchain_name = "#{username}-#{toolchain_tuple}-#{host_platform}-#{host_arch}"
 
-    {host_arch, _} = System.cmd("uname", ["-m"])
-    host_arch = String.strip(host_arch)
-
-    {host_os, _} = System.cmd("uname", ["-s"])
-    host_os = String.strip(host_os)
-    
-    toolchain_path = "#{nerves_home}/toolchains/#{toolchain_tuple}-#{host_os}-#{host_arch}"
-    |> Path.expand
-
+    toolchains = File.ls!(toolchains_path)
+    toolchain_name = Enum.find(toolchains, &(String.starts_with?(&1, toolchain_name)))
+    toolchain_path = "#{toolchains_path}/#{toolchain_name}"
+    Logger.debug "Toolchain Path: #{inspect toolchain_path}"
     if File.dir?(toolchain_path) do
       #Logger.debug "Toolchain #{toolchain_tuple} Found"
     else
-      raise "Toolchain #{toolchain_tuple}-#{host_arch}-#{host_os} not downloaded"
+      raise "Toolchain #{username}-#{toolchain_tuple}-#{host_platform}-#{host_arch} not downloaded"
     end
 
     stream = IO.binstream(:standard_io, :line)
@@ -63,7 +58,7 @@ defmodule Bake.Adapter.Nerves do
     source nerves-env.sh &&
     cd #{File.cwd!} &&
     mix release &&
-    sh #{rel2fw} rel/#{otp_name} _images/#{otp_name}.fw
+    sh #{rel2fw} rel/#{otp_name} _images/#{otp_name}-#{target}.fw
     """ |> remove_newlines
     Porcelain.shell(cmd, dir: system_path, env: env, out: stream)
   end
