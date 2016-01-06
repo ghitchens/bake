@@ -9,24 +9,21 @@ defmodule Bake.Cli.Toolchain do
   defp menu do
     """
       get     - Install toolchain for target
-      clean   - Uninstall local toolchain
     """
   end
 
   def main(args) do
     Bake.start
     {opts, cmd, _} = OptionParser.parse(args, switches: @switches)
-
     case cmd do
       ["get"] -> get(opts)
-      ["clean"] -> clean(opts)
       _ -> invalid_cmd(cmd)
     end
   end
 
-  defp list do
-    Bake.Shell.info "List installed toolchains"
-  end
+  # defp list do
+  #   Bake.Shell.info "List installed toolchains"
+  # end
 
   defp get(opts) do
     if opts[:target] == nil and opts[:all] == nil, do: raise """
@@ -52,7 +49,7 @@ defmodule Bake.Cli.Toolchain do
     end
   end
 
-  defp clean(opts) do
-
-  end
+  # defp clean(opts) do
+  #
+  # end
 end
