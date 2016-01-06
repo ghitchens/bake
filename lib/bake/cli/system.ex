@@ -43,9 +43,9 @@ defmodule Bake.Cli.System do
             mod = Module.concat("Elixir.Bake.Adapters", platform)
 
             Enum.each(target_config[:target], fn({target, v}) ->
-              Bake.Shell.info "=> Downloading System for target #{target}"
+              Bake.Shell.info "=> Downloading system for target #{target}"
               Bake.Api.System.get(%{recipe: v[:recipe]})
-              |> get_resp(platform)
+              |> get_resp(platform: platform, mod: mod)
             end)
             Bake.Shell.info "=> Finished"
         end
@@ -54,28 +54,29 @@ defmodule Bake.Cli.System do
     end
   end
 
-  defp get_resp({:ok, %{status_code: code, body: body}}, platform) when code in 200..299 do
+  defp get_resp({:ok, %{status_code: code, body: body}}, opts) when code in 200..299 do
     %{data: %{path: path, host: host, name: name}} = Poison.decode!(body, keys: :atoms)
 
     username = String.split(path, "/")
     |> List.first
-    platform = String.downcase platform
+    platform = String.downcase(opts[:platform])
+    mod = opts[:mod]
 
     case Bake.Api.request(:get, host <> "/" <> path, []) do
       {:ok, %{body: tar}} ->
         Bake.Shell.info "=> System #{username}/#{name} Downloaded"
-        dir = BakeUtils.bake_home <> "/#{platform}/systems/#{username}"
+        dir = mod.systems_path <> "/#{username}"
         File.mkdir_p(dir)
         File.write!("#{dir}/#{name}.tar.gz", tar)
-        Bake.Shell.info "=> Unpacking System #{username}/#{name}"
+        Bake.Shell.info "=> Unpacking system #{username}/#{name}"
         System.cmd("tar", ["zxf", "#{name}.tar.gz"], cd: dir)
         File.rm!("#{dir}/#{name}.tar.gz")
 
       {_, error} ->
-        raise "Error downloading system: #{inspect error}"
+        Bake.Shell.error "Error downloading system: #{inspect error}"
     end
   end
-  
+
   defp get_resp({_, response}, _platform) do
     Bake.Shell.error("Failed to download system")
     Bake.Utils.print_response_result(response)

@@ -19,7 +19,7 @@ defmodule Bake.Cli.Firmware do
     """
 
     target = opts[:target] || {:all}
-    bakefile = opts[:bakefile] || System.cwd! <> "/bakefile.exs"
+    bakefile = opts[:bakefile] || System.cwd! <> "/Bakefile"
 
     case Bake.Config.read!(bakefile) do
       {:ok, config} ->
@@ -31,7 +31,7 @@ defmodule Bake.Cli.Firmware do
             |> String.capitalize
 
             mod = Module.concat(Bake.Adapters, platform)
-            |> Module.concat(Assemble)
+
             otp_name = Path.dirname(bakefile) |> String.split("/") |> List.last
             mod.firmware(target_config, target, otp_name)
         end
