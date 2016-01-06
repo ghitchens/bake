@@ -6,6 +6,8 @@ defmodule Bake.Adapter.Nerves do
   def system_get(config) do
 
   end
+  def systems_path, do: "#{@nerves_home}/systems/" |> Path.expand
+  def toolchains_path, do: "#{@nerves_home}/toolchains/" |> Path.expand
 
   def firmware(config, target, otp_name) do
     Bake.Shell.info "Assembling firmware for target #{target}"
