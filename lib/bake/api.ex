@@ -12,7 +12,6 @@ defmodule Bake.Api do
     ]
     headers = Keyword.merge(default_headers, headers)
     {body, headers} = encoding(body, headers)
-    Logger.debug "URL: #{inspect url}"
 
     HTTPoison.request(
       method,
@@ -26,7 +25,6 @@ defmodule Bake.Api do
 
   def response({:ok, %{headers: headers}} = response) do
     update = headers["x-bake-update"] || headers["X-Bake-Update"]
-    Logger.debug "headers: #{inspect headers}"
     if update != nil do
       Bake.Shell.info "A new version of Bake is available: #{update}"
       Bake.Shell.info "You can update by running: bake update"
