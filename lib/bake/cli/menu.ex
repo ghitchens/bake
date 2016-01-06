@@ -26,7 +26,7 @@ defmodule Bake.Cli.Menu do
       end
 
       def check_bakefile(opts) do
-
+        opts[:bakefile] || System.cwd! <> "/Bakefile"
       end
     end
   end

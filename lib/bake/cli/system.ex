@@ -85,7 +85,8 @@ defmodule Bake.Cli.System do
 
   def clean(opts) do
     target = check_target(opts)
-    bakefile = opts[:file] || System.cwd! <> "/Bakefile"
+    bakefile = check_bakefile(opts)
+    Logger.debug "Bakefile: #{bakefile}"
     case Bake.Config.read!(bakefile) do
       {:ok, config} ->
         case Bake.Config.filter_target(config, target) do
@@ -98,9 +99,13 @@ defmodule Bake.Cli.System do
 
             Enum.each(target_config[:target], fn({target, v}) ->
               Bake.Shell.info "=> Cleaning system for target #{target}"
-              dir = mod.systems_path <> "/#{v[:recipe]}"
-              Bake.Shell.info "=>    Removing system #{v[:recipe]}"
-              File.rm_rf!(dir)
+              system_path = mod.systems_path <> "/#{v[:recipe]}"
+              if File.dir?(system_path) do
+                Bake.Shell.info "=>    Removing system #{v[:recipe]}"
+                File.rm_rf!(system_path)
+              else
+                Bake.Shell.info "System #{v[:recipe]} not downloaded"
+              end
             end)
             Bake.Shell.info "=> Finished"
         end
