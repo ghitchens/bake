@@ -6,8 +6,8 @@ defmodule Bake.Api.System do
   #   Api.request(:post, Api.url(@base_url <> "/#{recipe}"), Api.auth(auth))
   # end
 
-  def get(%{recipe: recipe}, auth) do
-    Api.request(:get, Api.url(@base_url <> "/#{recipe}"), Api.auth(auth))
+  def get(%{recipe: recipe}) do
+    Api.request(:get, Api.url(@base_url <> "/#{recipe}"), [])
   end
 
   def toolchain(recipe) do
