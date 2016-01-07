@@ -1,5 +1,18 @@
 # Release Notes
 
+## Bake 0.0.3
+### Enhancements
+
+* Added commands for system management
+    * bake system clean [—target [—all | target_name] —bakefile path/to/bakefile]
+* Added commands for toolchain management
+    * bake toolchain clean [—target [—all | target_name] —bakefile path/to/bakefile]
+
+### Bug Fixes
+
+* bake firmware —toolchain —all is fixed and enumerates all recipes now
+
+
 ## Bake 0.0.2
 ### Enhancements
 
