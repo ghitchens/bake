@@ -42,11 +42,11 @@ defmodule Bake.Cli.Toolchain do
             Enum.each(target_config[:target], fn({target, v}) ->
               Bake.Shell.info "=> Get toolchain for target #{target}"
               # First we need to find a local copy of the system for this target.
-              # The system config.exs will contain the information about the toolchain
+              # The system recipe.exs will contain the information about the toolchain
               recipe = v[:recipe]
               system_path = "#{mod.systems_path}/#{recipe}"
               if File.dir?(system_path) do
-                {:ok, system_config} = "#{system_path}/config.exs"
+                {:ok, system_config} = "#{system_path}/recipe.exs"
                 |> Bake.Config.Recipe.read!
 
                 {username, tuple} =
@@ -75,7 +75,6 @@ defmodule Bake.Cli.Toolchain do
 
     platform = String.downcase(opts[:platform])
     mod = opts[:mod]
-
     case Bake.Api.request(:get, host <> "/" <> path, []) do
       {:ok, %{status_code: code, body: tar}} when code in 200..299 ->
         Bake.Shell.info "=> Toolchain #{username}/#{tuple} Downloaded"
@@ -115,7 +114,7 @@ defmodule Bake.Cli.Toolchain do
 
               system_path = mod.systems_path <> "/#{v[:recipe]}"
               if File.dir?(system_path) do
-                {:ok, system_config} = "#{system_path}/config.exs"
+                {:ok, system_config} = "#{system_path}/recipe.exs"
                 |> Bake.Config.Recipe.read!
 
                 {username, toolchain_tuple, _toolchain_version} = system_config[:toolchain]

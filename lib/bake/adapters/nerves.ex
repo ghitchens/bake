@@ -31,7 +31,7 @@ defmodule Bake.Adapters.Nerves do
       raise "System #{inspect recipe} not downloaded"
     end
     # Read the recipe config from the system
-    {:ok, system_config} = "#{system_path}/config.exs"
+    {:ok, system_config} = "#{system_path}/recipe.exs"
     |> Bake.Config.Recipe.read!
 
     rel2fw = "#{system_path}/scripts/rel2fw.sh"
