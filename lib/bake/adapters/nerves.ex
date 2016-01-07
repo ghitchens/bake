@@ -9,10 +9,16 @@ defmodule Bake.Adapters.Nerves do
   def toolchains_path, do: "#{@nerves_home}/toolchains/" |> Path.expand
 
   def firmware(config, target, otp_name) do
-    Bake.Shell.info "Assembling firmware for target #{target}"
+    Bake.Shell.info "=> Building firmware for target #{target}"
+    target_atom =
+    cond do
+      is_atom(target) -> target
+      true -> String.to_atom(target)
+    end
+
     target_config = config
     |> Keyword.get(:target)
-    |> Keyword.get(String.to_atom(target))
+    |> Keyword.get(target_atom)
     recipe = target_config[:recipe]
     # TODO: Need to get locked version from the bakefile.lock
 

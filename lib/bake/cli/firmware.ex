@@ -33,7 +33,10 @@ defmodule Bake.Cli.Firmware do
             mod = Module.concat(Bake.Adapters, platform)
 
             otp_name = Path.dirname(bakefile) |> String.split("/") |> List.last
-            mod.firmware(target_config, target, otp_name)
+            Enum.each(target_config[:target], fn({target, v}) ->
+              mod.firmware(target_config, target, otp_name)
+            end)
+
         end
       {:error, e} ->
         Bake.Shell.info "No Bakefile Found"
