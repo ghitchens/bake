@@ -23,7 +23,7 @@ defmodule Bake.Adapters.Nerves do
     ]
 
     cmd = """
-    source nerves-env.sh &&
+    source #{system_path}/scripts/nerves-env-helper.sh #{system_path} &&
     cd #{File.cwd!} &&
     """
 
@@ -60,8 +60,7 @@ defmodule Bake.Adapters.Nerves do
     Porcelain.shell(cmd, dir: system_path, env: env, out: stream)
 
     if File.dir?("#{File.cwd!}/_build") do
-      result = File.write("#{File.cwd!}/_build/nerves_env", encode_term(env))
-      Logger.debug "Result"
+      File.write!("#{File.cwd!}/_build/nerves_env", encode_term(env))
     end
 
   end
