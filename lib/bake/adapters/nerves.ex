@@ -25,6 +25,8 @@ defmodule Bake.Adapters.Nerves do
     cmd = """
     source #{system_path}/scripts/nerves-env-helper.sh #{system_path} &&
     cd #{File.cwd!} &&
+    mix local.hex --force &&
+    mix local.rebar --force &&
     """
 
     #check for the env cache
@@ -38,16 +40,12 @@ defmodule Bake.Adapters.Nerves do
             {:error, _} -> decode_elixir(file)
           end
           unless build_env["NERVES_TARGET"] == to_string(target) do
-            cmd = cmd <> """
-            mix deps.clean --all &&
-            mix deps.get &&
-            mix deps.compile &&
-            """
+            cmd = clean_target(cmd)
           end
-        _ -> nil
+        _ -> cmd = clean_target(cmd)
       end
     else
-
+      cmd = clean_target(cmd)
     end
 
     cmd = cmd <> """
@@ -57,9 +55,8 @@ defmodule Bake.Adapters.Nerves do
     """ |> remove_newlines
 
 
-    Porcelain.shell(cmd, dir: system_path, env: env, out: stream)
-
-    if File.dir?("#{File.cwd!}/_build") do
+    result = Porcelain.shell(cmd, dir: system_path, env: env, out: stream)
+    if File.dir?("#{File.cwd!}/_build") and result.status == 0 do
       File.write!("#{File.cwd!}/_build/nerves_env", encode_term(env))
     end
 
@@ -125,5 +122,13 @@ defmodule Bake.Adapters.Nerves do
       raise "Toolchain #{username}-#{toolchain_tuple}-#{host_platform}-#{host_arch} not downloaded"
     end
     {toolchain_path, system_path}
+  end
+
+  defp clean_target(cmd) do
+    cmd <> """
+    mix deps.clean --all &&
+    mix deps.get &&
+    mix deps.compile &&
+    """
   end
 end
