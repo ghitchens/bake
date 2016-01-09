@@ -89,13 +89,13 @@ The nerves example app blinky illustrates this need. blinky uses the dep `nerves
 For example,
 
 Raspberry Pi 2
-```
+```elixir
 # config/rpi2/config.exs
 config :nerves_io_led, names: [ red: "led0", green: "led1" ]
 ```
 
 BeagleBone Black
-```
+```elixir
 # config/bbb/config.exs
 config :blinky, led_list: [ :led0, :led1, :led2, :led3 ]
 
