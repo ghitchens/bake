@@ -24,9 +24,10 @@ defmodule Bake.Api do
   end
 
   def response({:ok, %{headers: headers}} = response) do
-    update = headers["x-bake-update"] || headers["X-Bake-Update"]
+    update = Enum.find(headers, fn({header, _}) -> String.downcase(header) == "x-bake-version" end)
     if update != nil do
-      Bake.Shell.info "A new version of Bake is available: #{update}"
+      {_, version} = update
+      Bake.Shell.info "A new version of Bake is available: #{version}"
       Bake.Shell.info "You can update by running: bake update"
     end
     response
