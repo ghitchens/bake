@@ -3,10 +3,12 @@
 ## Bake 0.0.4
 ### Enhancements
 * Added `default_system` to `Bake.Config`. If defined, it will be used ad the target if the --target flag is omitted
-
+* `--target --all` is now `--target all`
+* Updated escript to elixir 1.2.0
 
 ### Bug Fixes
-
+* [nerves-adapter] When switching targets mix deps need to be cleaned and compiled
+* [nerves-adapter] Fixed bash issue when sourcing ENV for nerves system
 
 ## Bake 0.0.3
 ### Enhancements
