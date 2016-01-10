@@ -3,11 +3,9 @@ defmodule Bake.Config do
 
   require Logger
 
-
-
   defmacro __using__(_opts) do
     quote do
-      import Bake.Config, only: [platform: 1, target: 2]
+      import Bake.Config, only: [platform: 1, default_target: 1, target: 2]
       {:ok, agent} = Bake.Config.Agent.start_link
       var!(config_agent, Bake.Config) = agent
     end
@@ -20,6 +18,12 @@ defmodule Bake.Config do
     end
   end
 
+  defmacro default_target(name) do
+    quote do
+      Bake.Config.Agent.merge var!(config_agent, Bake.Config),
+         [{:default_target, unquote(name)}]
+    end
+  end
   defmacro target(name, opts) do
     quote do
       Bake.Config.Agent.merge var!(config_agent, Bake.Config),
@@ -27,12 +31,11 @@ defmodule Bake.Config do
     end
   end
 
-
-
-  def filter_target(config, {:all}), do: config
+  def filter_target(config, target) when is_binary(target), do: filter_target(config, String.to_atom(target))
+  def filter_target(config, :all), do: config
   def filter_target(config, target) do
     target_config = (config[:target] || [])
-      |> Keyword.take([String.to_atom(target)])
+      |> Keyword.take([target])
     case target_config do
       [] -> []
       target_config ->

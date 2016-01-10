@@ -35,15 +35,18 @@ To use bake for compiling firmware for nerves apps you need to add a `Bakefile` 
 use Bake.Config
 
 platform :nerves
+default_target :rpi2
 
 target :rpi2,
   recipe: "nerves/rpi2"
 ```
 
-In this example we are telling `bake` that we want to be able to produce firmware for a raspberry pi2. The bakefile needs at least 1 target defined, but you can specify as many targets as you want to build firmware for. The target atom can be anything you desire. It is used when executing commands as a label for your purposes. The recipe needs to be an active bakeware shared recipe.
+In this example we are telling `bake` that we want to be able to produce firmware for a raspberry pi2. The bakefile needs at least 1 target defined, but you can specify as many targets as you want to build firmware for. The target atom can be anything you desire. It is used when executing commands as a label for your purposes. By declaring a `default_target` if we omit the `--target` flag in commands, the default target will be used.
+
+
 
 ### Recipes
-
+The recipe needs to be an active bakeware shared recipe.
 Currently, nerves shares the following recipes.
 * nerves/bbb
 * nerves/rpi
@@ -58,17 +61,17 @@ Systems and toolchains for nerves are downloaded to NERVES_HOME which is typical
 * Toolchains `NERVES_HOME/toolchains`
 
 ```
-bake system get --target rpi2
+bake system get
 ```
 
 If your bakefile declares multiple targets and you want to get the systems for all targets you can run
 ```
-bake system get --target --all
+bake system get --targetm all
 ```
 
 Toolchains can get downloaded in a similar fashion.
 ```
-bake toolchain get --target rpi2
+bake toolchain get
 ```
 
 ### Application Configuration
@@ -112,7 +115,7 @@ config :nerves_io_led, names: [
 Once you have downloaded a system and a toolchain you can bake your nerves project into firmware. During this process bake will call the nerves firmware adapter. It will compile the elixir nerves application into the linux system using the toolchain to produce firmware.
 
 ```
-bake firmware --target rpi2
+bake firmware
 ```
 
 ### Burn SD

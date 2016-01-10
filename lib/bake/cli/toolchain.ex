@@ -28,57 +28,43 @@ defmodule Bake.Cli.Toolchain do
   # end
 
   defp get(opts) do
-    target = check_target(opts)
-    bakefile = check_bakefile(opts)
-    case Bake.Config.read!(bakefile) do
-      {:ok, config} ->
-        case Bake.Config.filter_target(config, target) do
-          [] -> Bake.Shell.info "Bakefile does not contain definition for target #{target}"
-          target_config ->
-            platform = target_config[:platform]
-              |> to_string
-              |> String.capitalize
-            mod = Module.concat("Elixir.Bake.Adapters", platform)
-            Enum.each(target_config[:target], fn({target, v}) ->
-              Bake.Shell.info "=> Get toolchain for target #{target}"
-              # First we need to find a local copy of the system for this target.
-              # The system recipe.exs will contain the information about the toolchain
-              recipe = v[:recipe]
-              system_path = "#{mod.systems_path}/#{recipe}"
-              if File.dir?(system_path) do
-                {:ok, system_config} = "#{system_path}/recipe.exs"
-                |> Bake.Config.Recipe.read!
+    {_, target_config, target} = bakefile(opts[:bakefile], opts[:target])
+    platform = target_config[:platform]
+    adapter = adapter(platform)
+    Enum.each(target_config[:target], fn({target, v}) ->
+      Bake.Shell.info "=> Get toolchain for target #{target}"
+      # First we need to find a local copy of the system for this target.
+      # The system recipe.exs will contain the information about the toolchain
+      recipe = v[:recipe]
+      system_path = "#{adapter.systems_path}/#{recipe}"
+      if File.dir?(system_path) do
+        {:ok, system_config} = "#{system_path}/recipe.exs"
+        |> Bake.Config.Recipe.read!
 
-                {username, tuple} =
-                case system_config[:toolchain] do
-                  {username, tuple, _version} -> {username, tuple}
-                  ret -> ret
-                end
-
-                Bake.Api.Toolchain.get(%{tuple: tuple, username: username})
-                |> get_resp(platform: platform, mod: mod)
-
-              else
-                Bake.Shell.error "System #{recipe} not downloaded. Please download the system first by running: "
-                Bake.Shell.error "bake system get --target #{target}"
-              end
-            end)
+        {username, tuple} =
+        case system_config[:toolchain] do
+          {username, tuple, _version} -> {username, tuple}
+          ret -> ret
         end
-      {:error, e} ->
-        Logger.debug "Bakefile Parse Error: #{inspect e}"
-        Bake.Shell.info "No Bakefile Found"
-    end
+
+        Bake.Api.Toolchain.get(%{tuple: tuple, username: username})
+        |> get_resp(platform: platform, adapter: adapter)
+
+      else
+        Bake.Shell.error "System #{recipe} not downloaded. Please download the system first by running: "
+        Bake.Shell.error "bake system get --target #{target}"
+      end
+    end)
   end
 
   defp get_resp({:ok, %{status_code: code, body: body}}, opts) when code in 200..299 do
     %{data: %{path: path, host: host, target_tuple: tuple, username: username}} = Poison.decode!(body, keys: :atoms)
 
-    platform = String.downcase(opts[:platform])
-    mod = opts[:mod]
+    adapter = opts[:adapter]
     case Bake.Api.request(:get, host <> "/" <> path, []) do
       {:ok, %{status_code: code, body: tar}} when code in 200..299 ->
         Bake.Shell.info "=> Toolchain #{username}/#{tuple} Downloaded"
-        dir = mod.toolchains_path
+        dir = adapter.toolchains_path
         File.mkdir_p(dir)
         File.write!("#{dir}/#{tuple}.tar.gz", tar)
         Bake.Shell.info "=> Unpacking toolchain #{username}/#{tuple}"
@@ -97,49 +83,36 @@ defmodule Bake.Cli.Toolchain do
   end
 
   def clean(opts) do
-    target = check_target(opts)
-    bakefile = check_bakefile(opts)
-    case Bake.Config.read!(bakefile) do
-      {:ok, config} ->
-        case Bake.Config.filter_target(config, target) do
-          [] -> Bake.Shell.info "Bakefile does not contain definition for target #{target}"
-          target_config ->
-            platform = target_config[:platform]
-              |> to_string
-              |> String.capitalize
-            mod = Module.concat("Elixir.Bake.Adapters", platform)
+    {_, target_config, target} = bakefile(opts[:bakefile], opts[:target])
+    platform = target_config[:platform]
+    adapter = adapter(platform)
+    Enum.each(target_config[:target], fn({target, v}) ->
+      Bake.Shell.info "=> Cleaning toolchain for target #{target}"
 
-            Enum.each(target_config[:target], fn({target, v}) ->
-              Bake.Shell.info "=> Cleaning toolchain for target #{target}"
+      system_path = adapter.systems_path <> "/#{v[:recipe]}"
+      if File.dir?(system_path) do
+        {:ok, system_config} = "#{system_path}/recipe.exs"
+        |> Bake.Config.Recipe.read!
 
-              system_path = mod.systems_path <> "/#{v[:recipe]}"
-              if File.dir?(system_path) do
-                {:ok, system_config} = "#{system_path}/recipe.exs"
-                |> Bake.Config.Recipe.read!
+        {username, toolchain_tuple, _toolchain_version} = system_config[:toolchain]
+        host_platform = BakeUtils.host_platform
+        host_arch = BakeUtils.host_arch
+        toolchain_name = "#{username}-#{toolchain_tuple}-#{host_platform}-#{host_arch}"
 
-                {username, toolchain_tuple, _toolchain_version} = system_config[:toolchain]
-                host_platform = BakeUtils.host_platform
-                host_arch = BakeUtils.host_arch
-                toolchain_name = "#{username}-#{toolchain_tuple}-#{host_platform}-#{host_arch}"
-
-                toolchains = File.ls!(mod.toolchains_path)
-                toolchain_name = Enum.find(toolchains, &(String.starts_with?(&1, toolchain_name)))
-                toolchain_path = "#{mod.toolchains_path}/#{toolchain_name}"
-                if File.dir?(toolchain_path) do
-                  Bake.Shell.info "=>    Removing toolchain #{toolchain_path}"
-                  File.rm_rf!(toolchain_path)
-                else
-                  raise "Toolchain #{username}-#{toolchain_tuple}-#{host_platform}-#{host_arch} not downloaded"
-                end
-              else
-                Bake.Shell.info "System #{v[:recipe]} not downloaded"
-              end
-            end)
-            Bake.Shell.info "=> Finished"
+        toolchains = File.ls!(adapter.toolchains_path)
+        toolchain_name = Enum.find(toolchains, &(String.starts_with?(&1, toolchain_name)))
+        toolchain_path = "#{adapter.toolchains_path}/#{toolchain_name}"
+        if File.dir?(toolchain_path) do
+          Bake.Shell.info "=>    Removing toolchain #{toolchain_path}"
+          File.rm_rf!(toolchain_path)
+        else
+          raise "Toolchain #{username}-#{toolchain_tuple}-#{host_platform}-#{host_arch} not downloaded"
         end
-      {:error, e} ->
-        Bake.Shell.info "No Bakefile Found"
-    end
+      else
+        Bake.Shell.info "System #{v[:recipe]} not downloaded"
+      end
+    end)
+    Bake.Shell.info "=> Finished"
   end
 
 end

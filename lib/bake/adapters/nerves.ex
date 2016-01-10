@@ -39,7 +39,7 @@ defmodule Bake.Adapters.Nerves do
             {:ok, term} -> term
             {:error, _} -> decode_elixir(file)
           end
-          unless build_env["NERVES_TARGET"] == to_string(target) do
+          unless build_env[:"NERVES_TARGET"] == to_string(target) do
             cmd = clean_target(cmd)
           end
         _ -> cmd = clean_target(cmd)

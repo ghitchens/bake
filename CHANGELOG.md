@@ -1,5 +1,13 @@
 # Release Notes
 
+## Bake 0.0.4
+### Enhancements
+* Added `default_system` to `Bake.Config`. If defined, it will be used ad the target if the --target flag is omitted
+
+
+### Bug Fixes
+
+
 ## Bake 0.0.3
 ### Enhancements
 

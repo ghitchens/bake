@@ -8,6 +8,10 @@ defmodule Bake.Shell do
   def error(output),
     do: Mix.shell.error(output)
 
+  def error_exit(output) do
+    reraise(%Bake.Error{message: output}, [])
+  end
+
   def yes?(output),
     do: Mix.shell.yes?(output)
 
