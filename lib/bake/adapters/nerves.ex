@@ -9,9 +9,11 @@ defmodule Bake.Adapters.Nerves do
   def systems_path, do: "#{@nerves_home}/systems/" |> Path.expand
   def toolchains_path, do: "#{@nerves_home}/toolchains/" |> Path.expand
 
-  def firmware(config, target, otp_name) do
+  def firmware(bakefile_path, config, target, otp_name) do
+    otp_app_path = Path.dirname(bakefile_path)
+
     Bake.Shell.info "=> Building firmware for target #{target}"
-    {toolchain_path, system_path} = config_env(config, target)
+    {toolchain_path, system_path} = config_env(bakefile_path, config, target)
     rel2fw = "#{system_path}/scripts/rel2fw.sh"
     stream = IO.binstream(:standard_io, :line)
     env = [
@@ -74,9 +76,9 @@ defmodule Bake.Adapters.Nerves do
     Porcelain.shell(cmd, out: stream)
   end
 
-  def burn(config, target, otp_name) do
+  def burn(bakefile_path, config, target, otp_name) do
     Bake.Shell.info "=> Burning firmware for target #{target}"
-    {toolchain_path, system_path} = config_env(config, target)
+    {toolchain_path, system_path} = config_env(bakefile_path, config, target)
     stream = IO.binstream(:standard_io, :line)
     env = [
       {"NERVES_APP", File.cwd!},
@@ -93,7 +95,7 @@ defmodule Bake.Adapters.Nerves do
     string |> String.strip |> String.replace("\n", " ")
   end
 
-  defp config_env(config, target) do
+  defp config_env(bakefile_path, config, target) do
     target_atom =
     cond do
       is_atom(target) -> target
