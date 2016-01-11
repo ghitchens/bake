@@ -29,7 +29,7 @@ defmodule Bake.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [
-      {:httpoison, "~> 0.7.2"},
+      {:httpoison, "~> 0.8.0"},
       {:poison, "~> 1.5.0"},
       {:exrm, "~> 0.19.8"},
       {:git_cli, "~> 0.1.0"},
