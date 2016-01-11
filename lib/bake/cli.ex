@@ -26,6 +26,7 @@ defmodule Bake.Cli do
       ["system" | cmd] -> Cli.System.main(cmd)
       ["toolchain" | cmd] -> Cli.Toolchain.main(cmd)
       ["firmware" | cmd] -> Cli.Firmware.main(cmd)
+      ["clean" | cmd] -> clean(cmd)
       ["burn" | cmd] -> Cli.Burn.main(cmd)
       cmd -> switch(cmd, args)
     end
@@ -61,6 +62,12 @@ defmodule Bake.Cli do
   # def bake(args) do
   #   Cli.Bake.main(args)
   # end
+  defp clean(opts) do
+    {_, target_config, target} = bakefile(opts[:bakefile], opts[:target])
+    platform = target_config[:platform]
+    adapter = adapter(platform)
+    adapter.clean
+  end
 
   defp update({:ok, %{body: tar}}) do
     Bake.Shell.info "Unpacking Update"

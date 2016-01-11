@@ -62,6 +62,18 @@ defmodule Bake.Adapters.Nerves do
 
   end
 
+  def clean do
+    Bake.Shell.info "=> Cleaning project"
+    cmd = """
+    mix release.clean &&
+    mix clean &&
+    rm -rf _images/*.fw
+    """ |> remove_newlines
+    stream = IO.binstream(:standard_io, :line)
+    Bake.Shell.info "==> Removing firmware images"
+    Porcelain.shell(cmd, out: stream)
+  end
+
   def burn(config, target, otp_name) do
     Bake.Shell.info "=> Burning firmware for target #{target}"
     {toolchain_path, system_path} = config_env(config, target)
