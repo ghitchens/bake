@@ -19,7 +19,8 @@ defmodule Bake.Api do
       body,
       headers,
       timeout: @timeout,
-      recv_timeout: @timeout
+      recv_timeout: @timeout,
+      follow_redirect: true
     ) |> response
   end
 
