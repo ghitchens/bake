@@ -21,7 +21,7 @@ defmodule Bake.Cli.Firmware do
     adapter = adapter(platform)
     otp_name = Path.dirname(bakefile) |> String.split("/") |> List.last
     Enum.each(target_config[:target], fn({target, v}) ->
-      adapter.firmware(target_config, target, otp_name)
+      adapter.firmware(bakefile, target_config, target, otp_name)
     end)
   end
 end
