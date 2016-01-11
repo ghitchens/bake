@@ -14,8 +14,8 @@ defmodule Bake.Api.System do
     Api.request(:get, Api.url(@base_url <> "/#{recipe}/#{version}"), [])
   end
 
-  def get(%{recipe: recipe}) do
-    Api.request(:get, Api.url(@base_url <> "/#{recipe}"), [])
-  end
+  # def get(%{recipe: recipe}) do
+  #   Api.request(:get, Api.url(@base_url <> "/#{recipe}"), [])
+  # end
 
 end

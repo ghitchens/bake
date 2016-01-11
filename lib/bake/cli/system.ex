@@ -43,7 +43,8 @@ defmodule Bake.Cli.System do
         case Keyword.get(lock_targets, target) do
           nil ->
             # Target is not locked, download latest version
-            Bake.Api.System.get(%{recipe: v[:recipe]})
+            {recipe, version} = v[:recipe]
+            Bake.Api.System.get(%{recipe: recipe, requirement: version})
             |> get_resp(platform: platform, adapter: adapter, lock_file: lock_path, target: target)
           [{recipe, version}] ->
             Bake.Api.System.get(%{recipe: recipe, version: version})
@@ -51,7 +52,8 @@ defmodule Bake.Cli.System do
         end
       else
         # The lockfile doesn't exist. Download latest version
-        Bake.Api.System.get(%{recipe: v[:recipe]})
+        {recipe, version} = v[:recipe]
+        Bake.Api.System.get(%{recipe: recipe, requirement: version})
         |> get_resp(platform: platform, adapter: adapter, lock_file: lock_path, target: target)
       end
     end)
@@ -78,11 +80,13 @@ defmodule Bake.Cli.System do
 
     adapter = opts[:adapter]
     system_path = "#{adapter.systems_path}/#{username}/#{name}-#{version}"
+    lock_file = opts[:lock_file]
+    target = opts[:target]
+
     if File.dir?(system_path) do
       Bake.Shell.info "=> System #{username}/#{name} at #{version} up to date"
+      Bake.Config.Lock.update(lock_file, [targets: [{target, ["#{username}/#{name}": version]}]])
     else
-      lock_file = opts[:lock_file]
-      target = opts[:target]
       Bake.Shell.info "=> Downloading system #{username}/#{name}-#{version}"
       case Bake.Api.request(:get, host <> "/" <> path, []) do
         {:ok, %{status_code: code, body: tar}} when code in 200..299 ->
@@ -93,7 +97,7 @@ defmodule Bake.Cli.System do
           Bake.Shell.info "=> Unpacking system #{username}/#{name}-#{version}"
           System.cmd("tar", ["zxf", "#{name}-#{version}.tar.gz"], cd: dir)
           File.rm!("#{dir}/#{name}-#{version}.tar.gz")
-          Bake.Config.Lock.write(lock_file, [targets: [{target, ["#{username}/#{name}": version]}]])
+          Bake.Config.Lock.update(lock_file, [targets: [{target, ["#{username}/#{name}": version]}]])
         {_, response} ->
           Bake.Shell.error("Failed to download system")
           Bake.Utils.print_response_result(response)
@@ -116,16 +120,29 @@ defmodule Bake.Cli.System do
     lock_path = lock_path <> "/Bakefile.lock"
 
     Enum.each(target_config[:target], fn({target, v}) ->
-      Bake.Shell.info "=> Cleaning system for target #{target}"
-      system_path = adapter.systems_path <> "/#{v[:recipe]}"
-      if File.dir?(system_path) do
-        Bake.Shell.info "=>    Removing system #{v[:recipe]}"
-        File.rm_rf!(system_path)
+      {recipe, version} = v[:recipe]
+      if File.exists?(lock_path) do
+        # The exists. Check to see if it contains a lock for our target
+        lock_file = Bake.Config.Lock.read(lock_path)
+        lock_targets = lock_file[:targets]
+        case Keyword.get(lock_targets, target) do
+          nil ->
+            Bake.Shell.info "Target does not contain locked #{recipe}"
+          [{recipe, version}] ->
+            system_path = adapter.systems_path <> "/#{recipe}-#{version}"
+            if File.dir?(system_path) do
+              Bake.Shell.info "=> Cleaning system for target #{target}"
+              Bake.Shell.info "==> Removing system #{recipe}-#{version}"
+              File.rm_rf!(system_path)
+            else
+              Bake.Shell.info "System #{recipe}-#{version} not downloaded"
+            end
+        end
       else
-        Bake.Shell.info "System #{v[:recipe]} not downloaded"
+        # The lockfile doesn't exist. Download latest version
+        Bake.Shell.info "Target does not contain locked #{recipe}"
       end
     end)
-    Bake.Shell.info "=> Finished"
   end
 
 end

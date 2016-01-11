@@ -28,29 +28,46 @@ defmodule Bake.Cli.Toolchain do
   # end
 
   defp get(opts) do
-    {_, target_config, target} = bakefile(opts[:bakefile], opts[:target])
+    {bakefile_path, target_config, target} = bakefile(opts[:bakefile], opts[:target])
     platform = target_config[:platform]
     adapter = adapter(platform)
-    Enum.each(target_config[:target], fn({target, v}) ->
-      Bake.Shell.info "=> Get toolchain for target #{target}"
-      # First we need to find a local copy of the system for this target.
-      # The system recipe.exs will contain the information about the toolchain
-      recipe = v[:recipe]
-      system_path = "#{adapter.systems_path}/#{recipe}"
-      if File.dir?(system_path) do
-        {:ok, system_config} = "#{system_path}/recipe.exs"
-        |> Bake.Config.Recipe.read!
 
-        {username, tuple, version} = system_config[:toolchain]
-        Logger.debug "System Config: #{inspect system_config[:toolchain]}"
-        Bake.Api.Toolchain.get(%{tuple: tuple, username: username, version: version})
-        |> get_resp(platform: platform, adapter: adapter)
+    lock_path = bakefile_path
+    |> Path.dirname
 
-      else
-        Bake.Shell.error "System #{recipe} not downloaded. Please download the system first by running: "
-        Bake.Shell.error "bake system get --target #{target}"
-      end
-    end)
+    lock_path = lock_path <> "/Bakefile.lock"
+
+    if File.exists?(lock_path) do
+      # The exists. Check to see if it contains a lock for our target
+      lock_file = Bake.Config.Lock.read(lock_path)
+      lock_targets = lock_file[:targets]
+      Enum.each(target_config[:target], fn({target, v}) ->
+        Bake.Shell.info "=> Get toolchain for target #{target}"
+        # First we need to find a local copy of the system for this target.
+        # The system recipe.exs will contain the information about the toolchain
+
+          case Keyword.get(lock_targets, target) do
+            nil ->
+              # Target is not locked, download latest version
+              {recipe, _} = v
+              Bake.Shell.error "System #{recipe} not downloaded. Please download the system first by running: "
+              Bake.Shell.error "bake system get --target #{target}"
+            [{recipe, version}] ->
+              system_path = "#{adapter.systems_path}/#{recipe}-#{version}"
+              {:ok, system_config} = "#{system_path}/recipe.exs"
+              |> Bake.Config.Recipe.read!
+
+              {username, tuple, version} = system_config[:toolchain]
+              Logger.debug "System Config: #{inspect system_config[:toolchain]}"
+              Bake.Api.Toolchain.get(%{tuple: tuple, username: username, version: version})
+              |> get_resp(platform: platform, adapter: adapter)
+          end
+      end)
+    else
+      # The lockfile doesn't exist. Download latest version
+      # Bake.Shell.error "System #{recipe}-#{version} not downloaded. Please download the system first by running: "
+      # Bake.Shell.error "bake system get --target #{target}"
+    end
   end
 
   defp get_resp({:ok, %{status_code: code, body: body}}, opts) when code in 200..299 do
@@ -88,8 +105,8 @@ defmodule Bake.Cli.Toolchain do
     adapter = adapter(platform)
     Enum.each(target_config[:target], fn({target, v}) ->
       Bake.Shell.info "=> Cleaning toolchain for target #{target}"
-
-      system_path = adapter.systems_path <> "/#{v[:recipe]}"
+      {recipe, version} = v[:recipe]
+      system_path = adapter.systems_path <> "/#{recipe}-#{version}"
       if File.dir?(system_path) do
         {:ok, system_config} = "#{system_path}/recipe.exs"
         |> Bake.Config.Recipe.read!
@@ -109,7 +126,7 @@ defmodule Bake.Cli.Toolchain do
           raise "Toolchain #{username}-#{toolchain_tuple}-#{host_platform}-#{host_arch} not downloaded"
         end
       else
-        Bake.Shell.info "System #{v[:recipe]} not downloaded"
+        Bake.Shell.info "System #{recipe}-#{version} not downloaded"
       end
     end)
     Bake.Shell.info "=> Finished"

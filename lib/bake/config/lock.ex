@@ -1,5 +1,7 @@
 defmodule Bake.Config.Lock do
   # only for use with bakefile configs
+  import Bake.Config.Utils, only: [deep_merge: 2]
+
   defmacro __using__(_opts) do
 
   end
@@ -18,7 +20,7 @@ defmodule Bake.Config.Lock do
 
   def update(path, config) do
     content = read(path)
-    |> Keyword.merge(config)
+    |> deep_merge(config)
     write(path, content)
   end
 
