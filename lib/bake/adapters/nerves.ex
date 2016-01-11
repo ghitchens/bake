@@ -17,7 +17,7 @@ defmodule Bake.Adapters.Nerves do
     rel2fw = "#{system_path}/scripts/rel2fw.sh"
     stream = IO.binstream(:standard_io, :line)
     env = [
-      {"NERVES_APP", File.cwd!},
+      {"NERVES_APP", otp_app_path},
       {"NERVES_TOOLCHAIN", toolchain_path},
       {"NERVES_SYSTEM", system_path},
       {"NERVES_TARGET", to_string(target)},
@@ -26,15 +26,15 @@ defmodule Bake.Adapters.Nerves do
 
     cmd = """
     source #{system_path}/scripts/nerves-env-helper.sh #{system_path} &&
-    cd #{File.cwd!} &&
+    cd #{otp_app_path} &&
     mix local.hex --force &&
     mix local.rebar --force &&
     """
 
     #check for the env cache
-    if File.dir?("#{File.cwd!}/_build") do
+    if File.dir?("#{otp_app_path}/_build") do
       # Load the env file
-      case File.read("#{File.cwd!}/_build/nerves_env") do
+      case File.read("#{otp_app_path}/_build/nerves_env") do
         {:ok, file} ->
           build_env =
           case decode_term(file) do
@@ -58,8 +58,8 @@ defmodule Bake.Adapters.Nerves do
 
 
     result = Porcelain.shell(cmd, dir: system_path, env: env, out: stream)
-    if File.dir?("#{File.cwd!}/_build") and result.status == 0 do
-      File.write!("#{File.cwd!}/_build/nerves_env", encode_term(env))
+    if File.dir?("#{otp_app_path}/_build") and result.status == 0 do
+      File.write!("#{otp_app_path}/_build/nerves_env", encode_term(env))
     end
 
   end
@@ -105,17 +105,33 @@ defmodule Bake.Adapters.Nerves do
     target_config = config
     |> Keyword.get(:target)
     |> Keyword.get(target_atom)
-    recipe = target_config[:recipe]
-    # TODO: Need to get locked version from the bakefile.lock
 
-    # Check to ensure that the system is available in NERVES_HOME
-    system_path = "#{systems_path}/#{recipe}"
-    #Logger.debug "Path: #{inspect system_path}"
-    if File.dir?(system_path) do
-      #Logger.debug "System #{recipe} Found"
+    lock_path = bakefile_path
+    |> Path.dirname
+    lock_path = lock_path <> "/Bakefile.lock"
+    system_path = ""
+    system_version = ""
+    if File.exists?(lock_path) do
+      # The exists. Check to see if it contains a lock for our target
+      lock_file = Bake.Config.Lock.read(lock_path)
+      lock_targets = lock_file[:targets]
+      case Keyword.get(lock_targets, target) do
+        nil ->
+          Bake.Shell.error_exit "You must run bake system get for target #{target} before bake firmware"
+        [{recipe, version}] ->
+          system_path = "#{systems_path}/#{recipe}-#{version}"
+          recipe = recipe
+          system_version = version
+          unless File.dir?(system_path) do
+            Bake.Shell.error_exit "System #{inspect recipe} not downloaded"
+          end
+      end
     else
-      raise "System #{inspect recipe} not downloaded"
+      Bake.Shell.error_exit "You must run bake system get before bake firmware"
     end
+    recipe = target_config[:recipe]
+    Bake.Shell.info "==> Using System: #{recipe}-#{system_version}"
+
     # Read the recipe config from the system
     {:ok, system_config} = "#{system_path}/recipe.exs"
     |> Bake.Config.Recipe.read!
@@ -126,7 +142,7 @@ defmodule Bake.Adapters.Nerves do
     host_platform = BakeUtils.host_platform
     host_arch = BakeUtils.host_arch
     toolchain_path = "#{toolchains_path}/#{username}-#{toolchain_tuple}-#{host_platform}-#{host_arch}-v#{toolchain_version}"
-
+    Bake.Shell.info "==> Using Toolchain: #{username}-#{toolchain_tuple}-#{host_platform}-#{host_arch}-v#{toolchain_version}"
     # toolchains = File.ls!(toolchains_path)
     # toolchain_name = Enum.find(toolchains, &(String.starts_with?(&1, toolchain_name)))
     # toolchain_path = "#{toolchains_path}/#{toolchain_name}"
