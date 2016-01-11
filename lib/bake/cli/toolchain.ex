@@ -41,13 +41,9 @@ defmodule Bake.Cli.Toolchain do
         {:ok, system_config} = "#{system_path}/recipe.exs"
         |> Bake.Config.Recipe.read!
 
-        {username, tuple} =
-        case system_config[:toolchain] do
-          {username, tuple, _version} -> {username, tuple}
-          ret -> ret
-        end
-
-        Bake.Api.Toolchain.get(%{tuple: tuple, username: username})
+        {username, tuple, version} = system_config[:toolchain]
+        Logger.debug "System Config: #{inspect system_config[:toolchain]}"
+        Bake.Api.Toolchain.get(%{tuple: tuple, username: username, version: version})
         |> get_resp(platform: platform, adapter: adapter)
 
       else
@@ -61,6 +57,9 @@ defmodule Bake.Cli.Toolchain do
     %{data: %{path: path, host: host, target_tuple: tuple, username: username}} = Poison.decode!(body, keys: :atoms)
 
     adapter = opts[:adapter]
+
+    Logger.debug "Toolchain: #{host <> "/" <> path}"
+
     case Bake.Api.request(:get, host <> "/" <> path, []) do
       {:ok, %{status_code: code, body: tar}} when code in 200..299 ->
         Bake.Shell.info "=> Toolchain #{username}/#{tuple} Downloaded"
@@ -72,6 +71,7 @@ defmodule Bake.Cli.Toolchain do
         File.rm!("#{dir}/#{tuple}.tar.gz")
 
       {_, response} ->
+        Logger.debug "Response: #{inspect response}"
         Bake.Shell.error("Failed to download toolchain")
         Bake.Utils.print_response_result(response)
     end

@@ -120,18 +120,18 @@ defmodule Bake.Adapters.Nerves do
 
     #Logger.debug "System Config: #{inspect system_config}"
     # Toolchain
-    {username, toolchain_tuple, _toolchain_version} = system_config[:toolchain]
+    {username, toolchain_tuple, toolchain_version} = system_config[:toolchain]
     host_platform = BakeUtils.host_platform
     host_arch = BakeUtils.host_arch
-    toolchain_name = "#{username}-#{toolchain_tuple}-#{host_platform}-#{host_arch}"
+    toolchain_path = "#{toolchains_path}/#{username}-#{toolchain_tuple}-#{host_platform}-#{host_arch}-v#{toolchain_version}"
 
-    toolchains = File.ls!(toolchains_path)
-    toolchain_name = Enum.find(toolchains, &(String.starts_with?(&1, toolchain_name)))
-    toolchain_path = "#{toolchains_path}/#{toolchain_name}"
+    # toolchains = File.ls!(toolchains_path)
+    # toolchain_name = Enum.find(toolchains, &(String.starts_with?(&1, toolchain_name)))
+    # toolchain_path = "#{toolchains_path}/#{toolchain_name}"
     if File.dir?(toolchain_path) do
       #Logger.debug "Toolchain #{toolchain_tuple} Found"
     else
-      raise "Toolchain #{username}-#{toolchain_tuple}-#{host_platform}-#{host_arch} not downloaded"
+      raise "Toolchain #{username}-#{toolchain_tuple}-#{host_platform}-#{host_arch}-v#{toolchain_version} not downloaded"
     end
     {toolchain_path, system_path}
   end
