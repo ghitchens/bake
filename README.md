@@ -10,22 +10,22 @@ ruby -e "$(curl -fsSL https://bakeware.herokuapp.com/bake/install)"
 ```
 
 This script performs the following actions
-* Install the latest fwup
-* Install squashfs tools
-* Install the bake command to /usr/local/bin
-* Create configuration directory for BAKE_HOME @ ~/.bake
+* Install the latest `fwup`
+* Install `squashfs` tools
+* Install the `bake` command to `/usr/local/bin`
+* Create configuration directory for `BAKE_HOME` at `~/.bake`
 
 ## Usage
 
-Bake is a multi-target toolkit for building embedded applications using nerves. Before we compile our first project lets discuss some of the terminology we use to describe the bakeware / nerves workflow.
+Bakeware is a multi-target toolkit for building embedded applications using nerves. Before we compile our first project lets discuss some of the terminology we use to describe the bakeware / nerves workflow.
 
 ### Terminology
 
-* Target - A specific combination of recipe, application configuration, and assembly options that results in firmware
-* Recipe - Configuration which specifies a specific toolchain and system
-* Toolchain - A set of compilers, libraries, and tools that build code for a particular architecture. The output of nerves-toolchain. Built by the bake server, distribued in tarballs
-* System - The output of building nerves-sdk using a particular toolchain specified by a recipe.   Produced by the bake server - a tarball.   Includes header files, libraries, and a starting squashfs image that will be combined with the built application during assembly to produce the firmware
-* Assembly - The process of combining a built application, a rootfs, and other options (like fwup.conf) into firmware
+* `Target` - A specific combination of recipe, application configuration, and assembly options that results in firmware
+* `Recipe` - Configuration which specifies a specific toolchain and system
+* `Toolchain` - A set of compilers, libraries, and tools that build code for a particular architecture. The output of nerves-toolchain. Built by the bake server, distributed as tarballs
+* `System` - The output of building nerves-sdk using a particular toolchain specified by a recipe.   Produced by the bake server - a tarball.   Includes header files, libraries, and a starting `squashfs` image that will be combined with the built application during assembly to produce the firmware
+* `Assembly` - The process of combining a built application, a rootfs, and other options (like `fwup.conf`) into firmware
 
 ### Bakefile
 
@@ -38,23 +38,24 @@ platform :nerves
 default_target :rpi2
 
 target :rpi2,
-  recipe: "nerves/rpi2"
+  recipe: {"nerves/rpi2", "~> 0.1"}
 ```
 
-In this example we are telling `bake` that we want to be able to produce firmware for a raspberry pi2. The bakefile needs at least 1 target defined, but you can specify as many targets as you want to build firmware for. The target atom can be anything you desire. It is used when executing commands as a label for your purposes. By declaring a `default_target` if we omit the `--target` flag in commands, the default target will be used.
+In this example we are telling `bake` that we want to be able to produce firmware for a raspberry pi2. The `Bakefile` needs at least 1 target defined, but you can specify as many targets as you want to build firmware for. The target atom can be anything you desire. It is used when executing commands as a label for your purposes. By declaring a `default_target` if we omit the `--target` flag in commands, the default target will be used.
 
 
 
 ### Recipes
 The recipe needs to be an active bakeware shared recipe.
-Currently, nerves shares the following recipes.
-* nerves/bbb
-* nerves/rpi
-* nerves/rpi2
+Currently, nerves shares the following recipes and their current version.
+* {"nerves/bbb", "0.1.0"}
+* {"nerves/rpi", "0.1.0"}
+* {"nerves/rpi2", "0.1.0"}
+* {"nerves/galileo", "0.1.0"}
 
 ### Systems and Toolchains
 
-To compile firmware you will need to have bake pull the system and toolchain images required to build the recipes. Systems and toolchains are shared globally and therefore, if you have already pulled the systems and toolchains for another nerves app that has targets who use the same recipes, you do not need to pull these assets again.
+To compile firmware you will need to have `bake` pull the system and toolchain images required to build the recipes. Systems and toolchains are shared globally and therefore, if you have already pulled the systems and toolchains for another nerves app that has targets who use the same recipes, you do not need to pull these assets again.
 
 Systems and toolchains for nerves are downloaded to NERVES_HOME which is typically located at `~/.nerves`.
 * Systems - `NERVES_HOME/systems`
@@ -64,9 +65,9 @@ Systems and toolchains for nerves are downloaded to NERVES_HOME which is typical
 bake system get
 ```
 
-If your bakefile declares multiple targets and you want to get the systems for all targets you can run
+If your `Bakefile` declares multiple targets and you want to get the systems for all targets you can run
 ```
-bake system get --targetm all
+bake system get --target all
 ```
 
 Toolchains can get downloaded in a similar fashion.
@@ -76,7 +77,7 @@ bake toolchain get
 
 ### Application Configuration
 
-The NERVES_TARGET environment variable gets set by bake, such that mix.exs could use NERVES_TARGET to determine custom configuration per target.  This can be used for configuring the build process.  
+The `NERVES_TARGET` environment variable gets set by bake, such that mix.exs could use `NERVES_TARGET` to determine custom configuration per target.  This can be used for configuring the build process.  
 
 Examples
 
@@ -112,7 +113,7 @@ config :nerves_io_led, names: [
 
 ### Firmware
 
-Once you have downloaded a system and a toolchain you can bake your nerves project into firmware. During this process bake will call the nerves firmware adapter. It will compile the elixir nerves application into the linux system using the toolchain to produce firmware.
+Once you have downloaded a system and a toolchain you can `bake` your nerves project into firmware. During this process `bake` will call the nerves firmware adapter. It will compile the elixir nerves application into the linux system using the toolchain to produce firmware.
 
 ```
 bake firmware

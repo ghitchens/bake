@@ -1,5 +1,19 @@
 # Release Notes
 
+## Bake 0.1.0
+### Enhancements
+* Added System and toolchain versioning. This change will break you existing Bakefile. You will need to change your bake file to contain the semver requirement for the recipe used in your target
+```elixir
+# Old way
+target :bbb,
+  recipe: "nerves/bbb"
+# New way
+target :bbb,
+  recipe: {"nerves/bbb", "~> 0.1"}
+```
+* Added `bake system update [--target [all | target_name]]`
+* Fetching systems and toolchain will now check if the current version is already downloaded. You will need to call `bake system clean` and `bake system get` to force a re download of the system.
+
 ## Bake 0.0.4
 ### Enhancements
 * Added `default_system` to `Bake.Config`. If defined, it will be used ad the target if the --target flag is omitted
