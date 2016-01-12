@@ -129,7 +129,7 @@ defmodule Bake.Adapters.Nerves do
     else
       Bake.Shell.error_exit "You must run bake system get before bake firmware"
     end
-    recipe = target_config[:recipe]
+    {recipe, _} = target_config[:recipe]
     Bake.Shell.info "==> Using System: #{recipe}-#{system_version}"
 
     # Read the recipe config from the system
