@@ -4,6 +4,8 @@ defmodule Bake.Cli.System do
   alias Bake.Utils
   require Logger
 
+
+  @menu "system"
   @switches [target: :string, all: :boolean, file: :string]
 
   defp menu do
@@ -16,7 +18,11 @@ defmodule Bake.Cli.System do
   def main(args) do
     Bake.start
     {opts, cmd, _} = OptionParser.parse(args, switches: @switches)
-
+    all = opts[:all]
+    if all, do: Bake.Shell.info """
+    (Bake Warning) If you want to perform an action on all targets use
+    bake #{@menu} command --target all
+    """
     case cmd do
       ["get"] -> get(opts)
       ["update"] -> update(opts)

@@ -9,12 +9,16 @@ defmodule Bake.Cli.Firmware do
       --bakefile
     """
   end
-
-  @switches [target: :string, bakefile: :string]
+  @menu "firmware"
+  @switches [target: :string, all: :boolean, bakefile: :string]
 
   def main(args) do
     {opts, _, _} = OptionParser.parse(args, switches: @switches)
-
+    all = opts[:all]
+    if all, do: Bake.Shell.info """
+    (Bake Warning) If you want to perform an action on all targets use
+    bake #{@menu} command --target all
+    """
 
     {bakefile, target_config, target} = bakefile(opts[:bakefile], opts[:target])
     platform = target_config[:platform]
