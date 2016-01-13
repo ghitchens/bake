@@ -59,20 +59,22 @@ defmodule Bake.Cli.Toolchain do
               Bake.Shell.error "System #{recipe} not downloaded. Please download the system first by running: "
               Bake.Shell.error "bake system get --target #{target}"
             [{recipe, version}] ->
-              system_path = "#{adapter.systems_path}/#{recipe}-#{version}"
-              {:ok, system_config} = "#{system_path}/recipe.exs"
-              |> Bake.Config.Recipe.read!
-
-              {username, tuple, version} = system_config[:toolchain]
-              Logger.debug "System Config: #{inspect system_config[:toolchain]}"
-              Bake.Api.Toolchain.get(%{tuple: tuple, username: username, version: version})
-              |> get_resp(platform: platform, adapter: adapter)
+              # Get the system from the server
+              case Bake.Api.System.get(%{recipe: recipe, requirement: version}) do
+                {:ok, %{status_code: code, body: body}} when code in 200..299 -> nil
+                  %{data: %{toolchain: %{target_tuple: tuple, username: username, version: toolchain_version} = toolchain}} = Poison.decode!(body, keys: :atoms)
+                  Bake.Api.Toolchain.get(%{tuple: tuple, username: username, version: toolchain_version})
+                  |> get_resp(platform: platform, adapter: adapter)
+                {_, response} ->
+                  Bake.Shell.error("Failed to get toolchain for system")
+                  Bake.Utils.print_response_result(response)
+              end
           end
       end)
     else
       # The lockfile doesn't exist. Download latest version
-      # Bake.Shell.error "System #{recipe}-#{version} not downloaded. Please download the system first by running: "
-      # Bake.Shell.error "bake system get --target #{target}"
+      Bake.Shell.error "System #{recipe}-#{version} not downloaded. Please download the system first by running: "
+      Bake.Shell.error "bake system get --target #{target}"
     end
   end
 
@@ -101,6 +103,7 @@ defmodule Bake.Cli.Toolchain do
   end
 
   defp get_resp({_, response}, _platform) do
+    Logger.debug "Toolchain Response: #{inspect response}"
     Bake.Shell.error("Failed to download toolchain")
     Bake.Utils.print_response_result(response)
   end

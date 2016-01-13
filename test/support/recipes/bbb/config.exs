@@ -2,7 +2,7 @@ use Bake.Config.Recipe
 
 name :bbb
 platform :nerves
-target :arm
+arch :arm
 
 description """
 Minimal install image for BeagleBone Black
@@ -10,20 +10,12 @@ Minimal install image for BeagleBone Black
 
 version "0.0.1"
 maintainers [
-  "Justin Schneck",
-  "Frank Hunleth",
-  "Garth Hitchens",
-  "Chris Dutton"
+  "Justin Schneck"
 ]
 
-toolchain [
-  {"glibc", "4.9"},
-  {"erlang", "18.1"},
-  {"elixir", "1.1.1"}
-]
+toolchain {"nerves", "arm-unknown-linux-gnueabihf", "0.5.0"}
 
 meta [
-  kernel: [version: "3.8"],
   gcc:    [version: "4.9"],
   erlang: [version: "18.1"],
   elixir: [version: "1.1.1"]
