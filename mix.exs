@@ -51,6 +51,6 @@ defmodule Bake.Mixfile do
   end
 
   defp escript_platform(<<"darwin", _tail :: binary >>), do: "/usr/local/bin/bake"
-  defp escript_platform(_), do: Path.expand("~./bake/bin/bake")
+  defp escript_platform(_), do: Path.expand("~/.bake/bin/bake")
 
 end
