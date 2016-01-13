@@ -90,7 +90,7 @@ defmodule Bake.Cli.Toolchain do
         File.mkdir_p(dir)
         File.write!("#{dir}/#{tuple}.tar.gz", tar)
         Bake.Shell.info "=> Unpacking toolchain #{username}/#{tuple}"
-        System.cmd("tar", ["zxf", "#{tuple}.tar.gz"], cd: dir)
+        System.cmd("tar", ["xf", "#{tuple}.tar.gz"], cd: dir)
         File.rm!("#{dir}/#{tuple}.tar.gz")
 
       {_, response} ->

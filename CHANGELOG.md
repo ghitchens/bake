@@ -1,5 +1,9 @@
 # Release Notes
 
+## Bake 0.1.1-dev
+### Bug Fixes
+* Changed tar command for toolchains to support linux
+
 ## Bake 0.1.0
 ### Enhancements
 * Added System and toolchain versioning. This change will break you existing Bakefile. You will need to change your bake file to contain the semver requirement for the recipe used in your target
