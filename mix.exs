@@ -5,7 +5,7 @@ defmodule Bake.Mixfile do
     [app: :bake,
      version: "0.1.1-dev",
      elixir: "~> 1.1",
-     escript: [main_module: Bake.Cli, name: "bake", path: "/usr/local/bin/bake"],
+     escript: [main_module: Bake.Cli, name: "bake", path: escript_path],
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
      deps: deps]
@@ -41,4 +41,16 @@ defmodule Bake.Mixfile do
       {:ex_aws, "~> 0.4.11"}
     ]
   end
+
+  defp escript_path do
+    {platform, 0} = System.cmd("uname", ["-s"])
+    platform
+    |> String.strip
+    |> String.downcase
+    |> escript_platform
+  end
+
+  defp escript_platform(<<"darwin", _tail :: binary >>), do: "/usr/local/bin/bake"
+  defp escript_platform(_), do: Path.expand("~./bake/bin/bake")
+
 end
