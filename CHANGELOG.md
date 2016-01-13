@@ -1,8 +1,9 @@
 # Release Notes
 
-## Bake 0.1.1-dev
+## Bake 0.1.1
 ### Bug Fixes
 * Changed tar command for toolchains to support linux
+* Make escript_path location variable on platform
 
 ## Bake 0.1.0
 ### Enhancements
