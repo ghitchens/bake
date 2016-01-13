@@ -23,7 +23,7 @@ defmodule Bake.Cli.Recipe do
 
   def publish do
     recipe_config = System.cwd! <> "/config.exs"
-    case Bake.Recipe.Config.read!(recipe_config) do
+    case Bake.Config.Recipe.read!(recipe_config) do
       {:ok, config} ->
         cli_config = BakeUtils.Cli.Config.read
         user = BakeUtils.local_user(cli_config)
