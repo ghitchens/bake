@@ -37,18 +37,15 @@ defmodule Bake.Cli do
   end
 
   def switch(["update"], _) do
+    Bake.Shell.info "=> Checking for update"
+
     case Bake.Api.Update.get do
       {:ok, %{body: body}} ->
         case Poison.decode(body, keys: :atoms) do
-          {:ok, %{source: source}} ->
-            Bake.Shell.info "Downloading update"
-            HTTPoison.request(
-              :get,
-              source,
-              "",
-              [],
-              timeout: @timeout
-            ) |> update
+          {:ok, %{source: source, version: version} = update} ->
+            Version.compare(version, Bake.Utils.cli_version)
+            |> update_check(update)
+
           {:error, error} ->
             update_error(error)
         end
@@ -69,11 +66,25 @@ defmodule Bake.Cli do
     adapter.clean
   end
 
+  defp update_check(:gt, %{source: source, version: version}) do
+    Bake.Shell.info "==> Downloading bake v#{version}"
+    HTTPoison.request(
+      :get,
+      source,
+      "",
+      [],
+      timeout: @timeout
+    ) |> update
+  end
+  defp update_check(_, _) do
+    Bake.Shell.info "==> bake #{Bake.Utils.cli_version} is at the latest version"
+  end
+
   defp update({:ok, %{body: tar}}) do
-    Bake.Shell.info "Unpacking Update"
+    Bake.Shell.info "==> Unpacking Update"
     %{"bake" => bake} = BakeUtils.Tar.unpack(tar, :compressed)
     File.write!(Bake.Utils.escript_path, bake)
-    Bake.Shell.info "Update Complete"
+    Bake.Shell.info "==> Update Complete"
     #Logger.debug "Files: #{inspect files}"
   end
 
