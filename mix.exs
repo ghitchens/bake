@@ -3,7 +3,7 @@ defmodule Bake.Mixfile do
 
   def project do
     [app: :bake,
-     version: "0.1.2-dev",
+     version: "0.1.2",
      elixir: "~> 1.1",
      escript: [main_module: Bake.Cli, name: "bake", path: escript_path],
      build_embedded: Mix.env == :prod,

@@ -1,5 +1,9 @@
 # Release Notes
 
+## Bake 0.1.2
+### Enhancements
+* Bake now supports running on linux.
+
 ## Bake 0.1.1
 ### Bug Fixes
 * Changed tar command for toolchains to support linux
