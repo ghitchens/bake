@@ -24,8 +24,12 @@ defmodule Bake.Adapters.Nerves do
       {"MIX_ENV", System.get_env("MIX_ENV") || "dev"}
     ]
 
+    # The Nerves scripts require bash. The native shell could be sh, so
+    # invoke bash for the rest of the script. Note the single double-quote
+    # to keep the command to bash together.
     cmd = """
-    source #{system_path}/scripts/nerves-env-helper.sh #{system_path} &&
+    bash -c "
+    source #{system_path}/nerves-env.sh &&
     cd #{otp_app_path} &&
     mix local.hex --force &&
     mix local.rebar --force &&
@@ -53,7 +57,7 @@ defmodule Bake.Adapters.Nerves do
     cmd = cmd <> """
     mix compile &&
     mix release &&
-    sh #{rel2fw} rel/#{otp_name} _images/#{otp_name}-#{target}.fw
+    bash #{rel2fw} rel/#{otp_name} _images/#{otp_name}-#{target}.fw"
     """ |> remove_newlines
 
 
