@@ -3,7 +3,6 @@ defmodule Bake.Cli.Toolchain do
   @switches [target: :string, all: :boolean, file: :string]
 
   use Bake.Cli.Menu
-  require Logger
 
   defp menu do
     """
@@ -42,7 +41,7 @@ defmodule Bake.Cli.Toolchain do
       lock_file = Bake.Config.Lock.read(lock_path)
       lock_targets = lock_file[:targets]
       Enum.each(target_config[:target], fn({target, v}) ->
-        Bake.Shell.info "=> Get toolchain for target #{target}"
+        Bake.Shell.info "=> Checking toolchain for target #{target}"
         # First we need to find a local copy of the system for this target.
         # The system recipe.exs will contain the information about the toolchain
 
@@ -58,9 +57,16 @@ defmodule Bake.Cli.Toolchain do
               |> Bake.Config.Recipe.read!
 
               {username, tuple, version} = system_config[:toolchain]
-              Logger.debug "System Config: #{inspect system_config[:toolchain]}"
-              Bake.Api.Toolchain.get(%{tuple: tuple, username: username, version: version})
-              |> get_resp(platform: platform, adapter: adapter)
+              host_platform = BakeUtils.host_platform
+              host_arch = BakeUtils.host_arch
+              toolchain = "#{username}-#{tuple}-#{host_platform}-#{host_arch}-v#{version}"
+              toolchain_path = "#{adapter.toolchains_path}/#{toolchain}"
+              if File.dir?(toolchain_path) do
+                Bake.Shell.info "=> Toolchain #{toolchain} up to date"
+              else
+                Bake.Api.Toolchain.get(%{tuple: tuple, username: username, version: version})
+                |> get_resp(platform: platform, adapter: adapter)
+              end
           end
       end)
     else
@@ -75,8 +81,6 @@ defmodule Bake.Cli.Toolchain do
 
     adapter = opts[:adapter]
 
-    Logger.debug "Toolchain: #{host <> "/" <> path}"
-
     case Bake.Api.request(:get, host <> "/" <> path, []) do
       {:ok, %{status_code: code, body: tar}} when code in 200..299 ->
         Bake.Shell.info "=> Toolchain #{username}/#{tuple} Downloaded"
@@ -88,7 +92,6 @@ defmodule Bake.Cli.Toolchain do
         File.rm!("#{dir}/#{tuple}.tar.gz")
 
       {_, response} ->
-        Logger.debug "Response: #{inspect response}"
         Bake.Shell.error("Failed to download toolchain")
         Bake.Utils.print_response_result(response)
     end
