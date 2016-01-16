@@ -1,9 +1,11 @@
 defmodule Bake.Cli do
+  @switches [version: :string]
+  @menu "bake"
+  
   use Bake.Cli.Menu
   alias Bake.Cli
   require Logger
 
-  @switches [version: :string]
 
   def menu do
     """
@@ -44,7 +46,7 @@ defmodule Bake.Cli do
     case Bake.Api.Update.get do
       {:ok, %{body: body}} ->
         case Poison.decode(body, keys: :atoms) do
-          {:ok, %{source: source, version: version} = update} ->
+          {:ok, %{source: _source, version: version} = update} ->
             Version.compare(version, Bake.Utils.cli_version)
             |> update_check(update)
 
@@ -62,7 +64,7 @@ defmodule Bake.Cli do
   #   Cli.Bake.main(args)
   # end
   defp clean(opts) do
-    {_, target_config, target} = bakefile(opts[:bakefile], opts[:target])
+    {_, target_config, _target} = bakefile(opts[:bakefile], opts[:target])
     platform = target_config[:platform]
     adapter = adapter(platform)
     adapter.clean
@@ -75,7 +77,7 @@ defmodule Bake.Cli do
       source,
       "",
       [],
-      timeout: @timeout
+      timeout: Bake.Api.timeout
     ) |> update
   end
   defp update_check(_, _) do

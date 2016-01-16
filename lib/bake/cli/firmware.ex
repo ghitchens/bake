@@ -1,6 +1,8 @@
 defmodule Bake.Cli.Firmware do
-  use Bake.Cli.Menu
+  @menu "firmware"
+  @switches [target: :string, all: :boolean, bakefile: :string]
 
+  use Bake.Cli.Menu
   require Logger
 
   defp menu do
@@ -9,8 +11,6 @@ defmodule Bake.Cli.Firmware do
       --bakefile
     """
   end
-  @menu "firmware"
-  @switches [target: :string, all: :boolean, bakefile: :string]
 
   def main(args) do
     {opts, _, _} = OptionParser.parse(args, switches: @switches)
@@ -20,11 +20,11 @@ defmodule Bake.Cli.Firmware do
     bake #{@menu} command --target all
     """
 
-    {bakefile, target_config, target} = bakefile(opts[:bakefile], opts[:target])
+    {bakefile, target_config, _target} = bakefile(opts[:bakefile], opts[:target])
     platform = target_config[:platform]
     adapter = adapter(platform)
     otp_name = Path.dirname(bakefile) |> String.split("/") |> List.last
-    Enum.each(target_config[:target], fn({target, v}) ->
+    Enum.each(target_config[:target], fn({target, _v}) ->
       adapter.firmware(bakefile, target_config, target, otp_name)
     end)
   end

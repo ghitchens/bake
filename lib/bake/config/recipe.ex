@@ -27,17 +27,4 @@ defmodule Bake.Config.Recipe do
     end
   end
 
-  def read!(file) do
-    try do
-      {config, binding} = Code.eval_file(file)
-      config = case List.keyfind(binding, {:config_agent, Bake.Config}, 0) do
-        {_, agent} -> get_config_and_stop_agent(agent)
-        nil        -> config
-      end
-      {:ok, config}
-    rescue
-      e -> {:error, e}
-    end
-  end
-
 end

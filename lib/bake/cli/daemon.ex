@@ -1,7 +1,9 @@
 defmodule Bake.Cli.Daemon do
+  @menu "daemon"
+  @switches [target: :string, all: :boolean]
+
   use Bake.Cli.Menu
 
-  @switches [target: :string, all: :boolean]
 
   defp menu do
     """
@@ -13,7 +15,7 @@ defmodule Bake.Cli.Daemon do
 
   def main(args) do
     Bake.start
-    {opts, cmd, _} = OptionParser.parse(args, switches: @switches)
+    {_opts, cmd, _} = OptionParser.parse(args, switches: @switches)
     case cmd do
       ["start"] -> start
       ["stop"] -> stop

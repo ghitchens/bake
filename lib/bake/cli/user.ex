@@ -1,9 +1,9 @@
 defmodule Bake.Cli.User do
-  use Bake.Cli.Menu
-
-  alias Bake.Utils
-
+  @menu "user"
   @switches [clean_pass: :boolean]
+
+  use Bake.Cli.Menu
+  alias Bake.Utils
 
   defp menu do
     """

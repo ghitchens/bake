@@ -1,11 +1,9 @@
 defmodule Bake.Cli.Toolchain do
-  use Bake.Cli.Menu
-
-  alias Bake.Utils
-  require Logger
-
   @menu "toolchain"
   @switches [target: :string, all: :boolean, file: :string]
+
+  use Bake.Cli.Menu
+  require Logger
 
   defp menu do
     """
@@ -30,7 +28,7 @@ defmodule Bake.Cli.Toolchain do
 
   defp get(opts) do
     all_warn(opts)
-    {bakefile_path, target_config, target} = bakefile(opts[:bakefile], opts[:target])
+    {bakefile_path, target_config, _target} = bakefile(opts[:bakefile], opts[:target])
     platform = target_config[:platform]
     adapter = adapter(platform)
 
@@ -102,7 +100,7 @@ defmodule Bake.Cli.Toolchain do
   end
 
   def clean([all: true] = opts) do
-    {bakefile_path, target_config, target} = bakefile(opts[:bakefile], opts[:target])
+    {_bakefile_path, target_config, _target} = bakefile(opts[:bakefile], opts[:target])
     platform = target_config[:platform]
     adapter = adapter(platform)
     Bake.Shell.info "You are about to clean all toolchains for #{platform}"
@@ -113,7 +111,7 @@ defmodule Bake.Cli.Toolchain do
   end
 
   def clean(opts) do
-    {_, target_config, target} = bakefile(opts[:bakefile], opts[:target])
+    {_, target_config, _target} = bakefile(opts[:bakefile], opts[:target])
     platform = target_config[:platform]
     adapter = adapter(platform)
     Enum.each(target_config[:target], fn({target, v}) ->

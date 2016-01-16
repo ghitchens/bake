@@ -1,13 +1,10 @@
 defmodule Bake.Cli.System do
-  use Bake.Cli.Menu
-
-  alias Bake.Utils
-  require Logger
-
-
   @menu "system"
   @switches [target: :string, all: :boolean, file: :string]
 
+  use Bake.Cli.Menu
+  require Logger
+  
   defp menu do
     """
       get       - Get a compiled system tar from bakeware.
@@ -20,7 +17,6 @@ defmodule Bake.Cli.System do
   def main(args) do
     Bake.start
     {opts, cmd, _} = OptionParser.parse(args, switches: @switches)
-    all = opts[:all]
 
     case cmd do
       ["get"] -> get(opts)
@@ -32,7 +28,7 @@ defmodule Bake.Cli.System do
 
   defp get(opts) do
     all_warn(opts)
-    {bakefile_path, target_config, target} = bakefile(opts[:bakefile], opts[:target])
+    {bakefile_path, target_config, _target} = bakefile(opts[:bakefile], opts[:target])
     platform = target_config[:platform]
     adapter = adapter(platform)
 
@@ -67,7 +63,7 @@ defmodule Bake.Cli.System do
 
   defp update(opts) do
     all_warn(opts)
-    {bakefile_path, target_config, target} = bakefile(opts[:bakefile], opts[:target])
+    {bakefile_path, target_config, _target} = bakefile(opts[:bakefile], opts[:target])
     platform = target_config[:platform]
     adapter = adapter(platform)
 
@@ -118,7 +114,7 @@ defmodule Bake.Cli.System do
   end
 
   def clean([all: true] = opts) do
-    {bakefile_path, target_config, target} = bakefile(opts[:bakefile], opts[:target])
+    {_bakefile_path, target_config, _target} = bakefile(opts[:bakefile], opts[:target])
     platform = target_config[:platform]
     adapter = adapter(platform)
     Bake.Shell.info "You are about to clean all systems for #{platform}"
@@ -129,7 +125,7 @@ defmodule Bake.Cli.System do
   end
 
   def clean(opts) do
-    {bakefile_path, target_config, target} = bakefile(opts[:bakefile], opts[:target])
+    {bakefile_path, target_config, _target} = bakefile(opts[:bakefile], opts[:target])
     platform = target_config[:platform]
     adapter = adapter(platform)
 
@@ -138,7 +134,7 @@ defmodule Bake.Cli.System do
     lock_path = lock_path <> "/Bakefile.lock"
 
     Enum.each(target_config[:target], fn({target, v}) ->
-      {recipe, version} = v[:recipe]
+      {recipe, _version} = v[:recipe]
       if File.exists?(lock_path) do
         # The exists. Check to see if it contains a lock for our target
         lock_file = Bake.Config.Lock.read(lock_path)

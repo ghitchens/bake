@@ -18,7 +18,7 @@ defmodule Bake.Oven do
     # Check to see if nerves exists
   end
 
-  def preheat(opts \\ []) do
+  def preheat(_opts \\ []) do
     ensure_started
     GenServer.call(__MODULE__, {:up}, :infinity)
   end
@@ -37,7 +37,7 @@ defmodule Bake.Oven do
     start_link
   end
 
-  def init(opts) do
+  def init(_opts) do
     Application.ensure_started(:ssh)
     {:ok, %{
       oven_dir: Utils.oven_dir,
@@ -51,11 +51,11 @@ defmodule Bake.Oven do
     }}
   end
 
-  def handle_call({:up}, _from, %{oven_dir: oven_dir} = s) do
+  def handle_call({:up}, _from, s) do
     Logger.debug "[oven] Preheating"
     case vagrant_cmd("status") do
       {:ok, :running} -> nil
-      result ->
+      _result ->
         vagrant_cmd("up")
         vagrant_cmd("provision")
     end
@@ -69,7 +69,7 @@ defmodule Bake.Oven do
     {:reply, :ok, s}
   end
 
-  def handle_call({:bake, recipe}, from , %{oven_dir: oven_dir} = s) do
+  def handle_call({:bake, _recipe}, from , s) do
     Logger.debug "[oven] Bake Started"
     #queue = [:ssh, {:cmd, "cd /opt/nerves-sdk", wait: false}, {:cmd, "sudo make #{recipe}", []}, {:cmd, "sudo make", []}]
     queue = [:ssh]
@@ -103,7 +103,7 @@ defmodule Bake.Oven do
     {:noreply, %{s | status: :baking, ssh_client: conn}}
   end
 
-  def handle_info({:cmd, cmd, opts}, %{oven_dir: oven_dir, port: port} = s) do
+  def handle_info({:cmd, cmd, opts}, %{port: port} = s) do
     Logger.debug "Opts: #{inspect opts}"
     wait = opts[:wait]
     if wait == nil, do: wait = true
@@ -113,19 +113,19 @@ defmodule Bake.Oven do
     {:noreply, s}
   end
 
-  def handle_info({:stdout,row}, %{status: :baking, port: port, queue: queue} = s) do
+  def handle_info({:stdout,row}, %{status: :baking} = s) do
     Logger.debug "[oven] SSH Output #{inspect row}"
     {:noreply, s}
   end
 
   # Command Generating Output
 
-  def handle_info({port, {:data, char}}, %{status: :ready, port: port, queue: queue} = s) do
+  def handle_info({port, {:data, char}}, %{status: :ready, port: port} = s) do
     Logger.debug "[oven] #{inspect char}"
     {:noreply, s}
   end
 
-  def handle_info({port, {:data, char}}, %{status: status} = s) do
+  def handle_info({_port, {:data, char}}, %{status: status} = s) do
     output = String.split(char, ",")
     timestamp   =   Enum.fetch!(output, 0)
     target      =   Enum.fetch!(output, 1)
@@ -137,7 +137,7 @@ defmodule Bake.Oven do
   end
 
   # Command Completed
-  def handle_info({port, {:exit_status, code}}, %{client: client} = s) do
+  def handle_info({_port, {:exit_status, _code}}, s) do
     Logger.debug "Command Complete"
     queue_next
     {:noreply, %{s | port: nil, status: :idle}}
@@ -148,7 +148,7 @@ defmodule Bake.Oven do
     {:noreply, s}
   end
 
-  def handle_info(:queue_next, %{queue: [task | queue], client: client} = s) do
+  def handle_info(:queue_next, %{queue: [task | queue]} = s) do
     Logger.debug "Queue: #{inspect task}"
     send(self, task)
     {:noreply, %{s | queue: queue}}

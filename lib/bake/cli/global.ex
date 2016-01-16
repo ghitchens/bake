@@ -1,9 +1,9 @@
 defmodule Bake.Cli.Global do
-  use Bake.Cli.Menu
-
-  require Logger
-
+  @menu "global"
   @switches []
+
+  use Bake.Cli.Menu
+  require Logger
 
   defp menu do
     """
@@ -14,7 +14,7 @@ defmodule Bake.Cli.Global do
   end
 
   def main(args) do
-    {opts, cmd, _} = OptionParser.parse(args, switches: @switches)
+    {_opts, cmd, _} = OptionParser.parse(args, switches: @switches)
     case cmd do
       ["set" | [variable | [value | _]]] -> set(variable, value)
       ["get" | [variable | _]] -> get(variable)

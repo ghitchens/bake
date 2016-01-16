@@ -25,7 +25,7 @@ defmodule Bake.Utils do
     case Poison.decode(body) do
       {:ok, %{"errors" => errors}} ->
         pretty_errors(errors)
-      {:error, error} ->
+      {:error, _error} ->
         Bake.Shell.info pretty_http_code(status_code)
     end
   end

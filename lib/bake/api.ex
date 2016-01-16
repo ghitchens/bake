@@ -18,8 +18,8 @@ defmodule Bake.Api do
       url,
       body,
       headers,
-      timeout: @timeout,
-      recv_timeout: @timeout,
+      timeout: timeout,
+      recv_timeout: timeout,
       follow_redirect: true
     ) |> response
   end
@@ -44,7 +44,7 @@ defmodule Bake.Api do
           {body, headers}
       end
     rescue
-      e -> {body, headers}
+      _e -> {body, headers}
     end
   end
 
@@ -63,5 +63,9 @@ defmodule Bake.Api do
 
   def user_agent do
     "Bake/#{Bake.version} (Elixir/#{System.version})"
+  end
+
+  def timeout do
+    @timeout
   end
 end

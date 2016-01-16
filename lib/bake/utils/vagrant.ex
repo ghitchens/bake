@@ -16,7 +16,7 @@ defmodule Bake.Utils.Vagrant do
   defp install_check do
     vagrant =
     try do
-      {version_string, code} = System.cmd("vagrant", ["--version"])
+      {version_string, _code} = System.cmd("vagrant", ["--version"])
       version = String.strip(version_string)
         |> String.split(" ")
         |> List.last
@@ -25,7 +25,7 @@ defmodule Bake.Utils.Vagrant do
       e -> {:error, e}
     end
     case vagrant do
-      {:ok, version} -> nil
+      {:ok, _version} -> nil
         #TODO Check version number to ensure compatibility
       {:error, _} -> install
     end
@@ -41,7 +41,7 @@ defmodule Bake.Utils.Vagrant do
 
   defp vagrantfile_init do
     case File.read(Utils.oven_dir <> "/Vagrantfile") do
-      {:ok, file} ->
+      {:ok, _file} ->
         Logger.debug "[oven] Vagrantfile Exists"
         nil
         # TODO check to ensure that the recipe has not changed.

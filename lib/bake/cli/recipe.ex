@@ -1,9 +1,9 @@
 defmodule Bake.Cli.Recipe do
-  use Bake.Cli.Menu
-
-  require Logger
-
+  @menu "recipe"
   @switches []
+  
+  use Bake.Cli.Menu
+  require Logger
 
   defp menu do
     """
@@ -13,7 +13,7 @@ defmodule Bake.Cli.Recipe do
   end
 
   def main(args) do
-    {opts, cmd, _} = OptionParser.parse(args, switches: @switches)
+    {_opts, cmd, _} = OptionParser.parse(args, switches: @switches)
     case cmd do
       ["publish"] -> publish
       ["rollback"] -> rollback
@@ -36,7 +36,7 @@ defmodule Bake.Cli.Recipe do
             %{recipe_name: config[:name], user_name: user, content: tar},
             auth
           ) do
-            {:ok, %{status_code: status_code, body: body}} when status_code in 200..299 ->
+            {:ok, %{status_code: status_code, body: _body}} when status_code in 200..299 ->
               Bake.Shell.info("Published recipe #{user}/#{config[:name]} successfully")
             {_, response} ->
               Bake.Shell.error("Failed to publish recipe")

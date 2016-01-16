@@ -1,7 +1,8 @@
 defmodule Bake.Cli.Burn do
-  use Bake.Cli.Menu
-
+  @menu "burn"
   @switches [target: :string, bakefile: :string]
+
+  use Bake.Cli.Menu
 
   defp menu do
     """
@@ -34,7 +35,7 @@ defmodule Bake.Cli.Burn do
             #end)
 
         end
-      {:error, e} ->
+      {:error, _e} ->
         Bake.Shell.info "No Bakefile Found"
     end
   end
