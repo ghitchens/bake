@@ -1,8 +1,12 @@
 # Release Notes
 
+## Bake 0.2.0-dev
+### Enhancements
+* Users can set default_target globally
+
 ## Bake 0.1.2
 ### Enhancements
-* Bake now supports running on linux.
+* Bake now supports running on linux
 
 ## Bake 0.1.1
 ### Bug Fixes
