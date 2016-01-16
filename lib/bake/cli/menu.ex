@@ -84,6 +84,7 @@ defmodule Bake.Cli.Menu do
         bake #{@menu} command --target all
         """
       end
+      def all_warn(_), do: nil
 
       def adapter(platform) do
         platform = platform
