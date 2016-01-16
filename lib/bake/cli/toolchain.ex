@@ -17,11 +17,6 @@ defmodule Bake.Cli.Toolchain do
   def main(args) do
     Bake.start
     {opts, cmd, _} = OptionParser.parse(args, switches: @switches)
-    all = opts[:all]
-    if all, do: Bake.Shell.info """
-    (Bake Warning) If you want to perform an action on all targets use
-    bake #{@menu} command --target all
-    """
     case cmd do
       ["get"] -> get(opts)
       ["clean"] -> clean(opts)
@@ -34,6 +29,7 @@ defmodule Bake.Cli.Toolchain do
   # end
 
   defp get(opts) do
+    all_warn(opts)
     {bakefile_path, target_config, target} = bakefile(opts[:bakefile], opts[:target])
     platform = target_config[:platform]
     adapter = adapter(platform)
@@ -103,6 +99,17 @@ defmodule Bake.Cli.Toolchain do
   defp get_resp({_, response}, _platform) do
     Bake.Shell.error("Failed to download toolchain")
     Bake.Utils.print_response_result(response)
+  end
+
+  def clean([all: true] = opts) do
+    {bakefile_path, target_config, target} = bakefile(opts[:bakefile], opts[:target])
+    platform = target_config[:platform]
+    adapter = adapter(platform)
+    Bake.Shell.info "You are about to clean all toolchains for #{platform}"
+    if Bake.Shell.yes?("Proceed?") do
+      File.rm_rf!(adapter.toolchains_path)
+      Bake.Shell.info "All #{platform} toolchains have been removed"
+    end
   end
 
   def clean(opts) do

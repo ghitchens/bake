@@ -78,6 +78,12 @@ defmodule Bake.Cli.Menu do
         target
       end
 
+      def all_warn(all: true) do
+        Bake.Shell.info """
+        (Bake Warning) If you want to perform an action on all targets use
+        bake #{@menu} command --target all
+        """
+      end
 
       def adapter(platform) do
         platform = platform

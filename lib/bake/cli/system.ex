@@ -11,7 +11,9 @@ defmodule Bake.Cli.System do
   defp menu do
     """
       get       - Get a compiled system tar from bakeware.
+      update    - Update a system
       clean     - Remove a local system from disk
+
     """
   end
 
@@ -19,10 +21,7 @@ defmodule Bake.Cli.System do
     Bake.start
     {opts, cmd, _} = OptionParser.parse(args, switches: @switches)
     all = opts[:all]
-    if all, do: Bake.Shell.info """
-    (Bake Warning) If you want to perform an action on all targets use
-    bake #{@menu} command --target all
-    """
+
     case cmd do
       ["get"] -> get(opts)
       ["update"] -> update(opts)
@@ -32,6 +31,7 @@ defmodule Bake.Cli.System do
   end
 
   defp get(opts) do
+    all_warn(opts)
     {bakefile_path, target_config, target} = bakefile(opts[:bakefile], opts[:target])
     platform = target_config[:platform]
     adapter = adapter(platform)
@@ -66,6 +66,7 @@ defmodule Bake.Cli.System do
   end
 
   defp update(opts) do
+    all_warn(opts)
     {bakefile_path, target_config, target} = bakefile(opts[:bakefile], opts[:target])
     platform = target_config[:platform]
     adapter = adapter(platform)
@@ -114,6 +115,17 @@ defmodule Bake.Cli.System do
   defp get_resp({_, response}, _platform) do
     Bake.Shell.error("Failed to download system")
     Bake.Utils.print_response_result(response)
+  end
+
+  def clean([all: true] = opts) do
+    {bakefile_path, target_config, target} = bakefile(opts[:bakefile], opts[:target])
+    platform = target_config[:platform]
+    adapter = adapter(platform)
+    Bake.Shell.info "You are about to clean all systems for #{platform}"
+    if Bake.Shell.yes?("Proceed?") do
+      File.rm_rf!(adapter.systems_path)
+      Bake.Shell.info "All #{platform} systems have been removed"
+    end
   end
 
   def clean(opts) do
