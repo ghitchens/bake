@@ -4,7 +4,7 @@ defmodule Bake.Cli.Toolchain do
 
   use Bake.Cli.Menu
 
-  defp menu do
+  def menu do
     """
       get     - Install toolchain for target
       clean   - Remove a local toolchain from disk

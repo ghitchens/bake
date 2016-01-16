@@ -5,7 +5,7 @@ defmodule Bake.Cli.Daemon do
   use Bake.Cli.Menu
 
 
-  defp menu do
+  def menu do
     """
       start   - Starts the bake daemon
       stop    - Stops the bake daemon

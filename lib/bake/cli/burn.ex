@@ -4,7 +4,7 @@ defmodule Bake.Cli.Burn do
 
   use Bake.Cli.Menu
 
-  defp menu do
+  def menu do
     """
     """
   end

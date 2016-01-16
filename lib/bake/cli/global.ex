@@ -5,7 +5,7 @@ defmodule Bake.Cli.Global do
   use Bake.Cli.Menu
   require Logger
 
-  defp menu do
+  def menu do
     """
       set variable value  - Set a global variable
       get variable        - Show a global variable

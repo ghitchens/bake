@@ -1,7 +1,7 @@
 defmodule Bake.Cli do
   @switches [version: :string]
   @menu "bake"
-  
+
   use Bake.Cli.Menu
   alias Bake.Cli
   require Logger
@@ -9,20 +9,22 @@ defmodule Bake.Cli do
 
   def menu do
     """
-      global    - Control global variables
-      daemon    - Control the local bake daemon
-      user      - User management commands
-      recipe    - Recipe Options
-      system    - Target system options
-      toolchain - Toolchain options
-      firmware  - Target Firmware options
-      burn      - Install language helper functions
+      help module - Show help for a module
+      global      - Control global variables
+      daemon      - Control the local bake daemon
+      user        - User management commands
+      recipe      - Recipe Options
+      system      - Target system options
+      toolchain   - Toolchain options
+      firmware    - Target Firmware options
+      burn        - Install language helper functions
     """
   end
 
   def main(args) do
     Bake.start
     case args do
+      ["help" | cmd] -> Cli.Help.main(cmd)
       ["global" | cmd] -> Cli.Global.main(cmd)
       ["daemon" | cmd] -> Cli.Daemon.main(cmd)
       ["user" | cmd] -> Cli.User.main(cmd)

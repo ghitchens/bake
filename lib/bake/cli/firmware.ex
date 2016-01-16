@@ -5,7 +5,7 @@ defmodule Bake.Cli.Firmware do
   use Bake.Cli.Menu
   require Logger
 
-  defp menu do
+  def menu do
     """
       --target
       --bakefile

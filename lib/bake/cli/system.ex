@@ -4,13 +4,12 @@ defmodule Bake.Cli.System do
 
   use Bake.Cli.Menu
   require Logger
-  
-  defp menu do
+
+  def menu do
     """
       get       - Get a compiled system tar from bakeware.
       update    - Update a system
       clean     - Remove a local system from disk
-
     """
   end
 

@@ -1,11 +1,11 @@
 defmodule Bake.Cli.Recipe do
   @menu "recipe"
   @switches []
-  
+
   use Bake.Cli.Menu
   require Logger
 
-  defp menu do
+  def menu do
     """
       publish   - Publishes the changes to the recipe
       rollback  - Rollback the last published version of the recipe

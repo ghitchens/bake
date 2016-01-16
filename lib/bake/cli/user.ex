@@ -5,7 +5,7 @@ defmodule Bake.Cli.User do
   use Bake.Cli.Menu
   alias Bake.Utils
 
-  defp menu do
+  def menu do
     """
       register  - Register a new user
       whoami    - Display current authorized user
