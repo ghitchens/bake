@@ -12,7 +12,7 @@ ruby -e "$(curl -fsSL https://bakeware.herokuapp.com/bake/install)"
 This script performs the following actions
 * Install the latest `fwup`
 * Install `squashfs` tools
-* Install the `bake` command to `/usr/local/bin`
+* Install `bake`
 * Create configuration directory for `BAKE_HOME` at `~/.bake`
 
 ## Usage
@@ -35,15 +35,14 @@ To use bake for compiling firmware for nerves apps you need to add a `Bakefile` 
 use Bake.Config
 
 platform :nerves
-default_target :rpi2
+# Optional
+# default_target :rpi2
 
 target :rpi2,
   recipe: {"nerves/rpi2", "~> 0.1"}
 ```
 
 In this example we are telling `bake` that we want to be able to produce firmware for a raspberry pi2. The `Bakefile` needs at least 1 target defined, but you can specify as many targets as you want to build firmware for. The target atom can be anything you desire. It is used when executing commands as a label for your purposes. By declaring a `default_target` if we omit the `--target` flag in commands, the default target will be used.
-
-
 
 ### Recipes
 The recipe needs to be an active bakeware shared recipe.

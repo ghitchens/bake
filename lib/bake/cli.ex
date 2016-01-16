@@ -7,6 +7,7 @@ defmodule Bake.Cli do
 
   def menu do
     """
+      global    - Control global variables
       daemon    - Control the local bake daemon
       user      - User management commands
       recipe    - Recipe Options
@@ -20,6 +21,7 @@ defmodule Bake.Cli do
   def main(args) do
     Bake.start
     case args do
+      ["global" | cmd] -> Cli.Global.main(cmd)
       ["daemon" | cmd] -> Cli.Daemon.main(cmd)
       ["user" | cmd] -> Cli.User.main(cmd)
       ["recipe" | cmd] -> Cli.Recipe.main(cmd)
