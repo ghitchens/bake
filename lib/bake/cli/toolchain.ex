@@ -44,7 +44,6 @@ defmodule Bake.Cli.Toolchain do
         Bake.Shell.info "=> Checking toolchain for target #{target}"
         # First we need to find a local copy of the system for this target.
         # The system recipe.exs will contain the information about the toolchain
-
           case Keyword.get(lock_targets, target) do
             nil ->
               # Target is not locked, download latest version
@@ -64,6 +63,7 @@ defmodule Bake.Cli.Toolchain do
               if File.dir?(toolchain_path) do
                 Bake.Shell.info "=> Toolchain #{toolchain} up to date"
               else
+                Bake.Shell.info "=> Downloading toolchain for target #{target}"
                 Bake.Api.Toolchain.get(%{tuple: tuple, username: username, version: version})
                 |> get_resp(platform: platform, adapter: adapter)
               end
@@ -80,7 +80,6 @@ defmodule Bake.Cli.Toolchain do
     %{data: %{path: path, host: host, target_tuple: tuple, username: username}} = Poison.decode!(body, keys: :atoms)
 
     adapter = opts[:adapter]
-
     case Bake.Api.request(:get, host <> "/" <> path, []) do
       {:ok, %{status_code: code, body: tar}} when code in 200..299 ->
         Bake.Shell.info "=> Toolchain #{username}/#{tuple} Downloaded"
@@ -114,36 +113,45 @@ defmodule Bake.Cli.Toolchain do
   end
 
   def clean(opts) do
-    {_, target_config, _target} = bakefile(opts[:bakefile], opts[:target])
+    {bakefile_path, target_config, _target} = bakefile(opts[:bakefile], opts[:target])
     platform = target_config[:platform]
     adapter = adapter(platform)
-    Enum.each(target_config[:target], fn({target, v}) ->
-      Bake.Shell.info "=> Cleaning toolchain for target #{target}"
-      {recipe, version} = v[:recipe]
-      system_path = adapter.systems_path <> "/#{recipe}-#{version}"
-      if File.dir?(system_path) do
-        {:ok, system_config} = "#{system_path}/recipe.exs"
-        |> Bake.Config.Recipe.read!
 
-        {username, toolchain_tuple, _toolchain_version} = system_config[:toolchain]
-        host_platform = BakeUtils.host_platform
-        host_arch = BakeUtils.host_arch
-        toolchain_name = "#{username}-#{toolchain_tuple}-#{host_platform}-#{host_arch}"
+    lock_path = bakefile_path
+    |> Path.dirname
 
-        toolchains = File.ls!(adapter.toolchains_path)
-        toolchain_name = Enum.find(toolchains, &(String.starts_with?(&1, toolchain_name)))
-        toolchain_path = "#{adapter.toolchains_path}/#{toolchain_name}"
-        if File.dir?(toolchain_path) do
-          Bake.Shell.info "=>    Removing toolchain #{toolchain_path}"
-          File.rm_rf!(toolchain_path)
-        else
-          raise "Toolchain #{username}-#{toolchain_tuple}-#{host_platform}-#{host_arch} not downloaded"
+    lock_path = lock_path <> "/Bakefile.lock"
+
+    if File.exists?(lock_path) do
+
+      lock_file = Bake.Config.Lock.read(lock_path)
+      lock_targets = lock_file[:targets]
+
+      Enum.each(target_config[:target], fn({target, v}) ->
+        Bake.Shell.info "=> Cleaning toolchain for target #{target}"
+        case Keyword.get(lock_targets, target) do
+          nil ->
+            Bake.Shell.error "System not downloaded. Please download the system first by running: "
+            Bake.Shell.error "bake system get --target #{target}"
+          [{recipe, version}] ->
+            system_path = "#{adapter.systems_path}/#{recipe}-#{version}"
+            {:ok, system_config} = "#{system_path}/recipe.exs"
+            |> Bake.Config.Recipe.read!
+
+            {username, toolchain_tuple, version} = system_config[:toolchain]
+            host_platform = BakeUtils.host_platform
+            host_arch = BakeUtils.host_arch
+            toolchain_name = "#{username}-#{toolchain_tuple}-#{host_platform}-#{host_arch}-v#{version}"
+            toolchain_path = "#{adapter.toolchains_path}/#{toolchain_name}"
+            if File.dir?(toolchain_path) do
+              Bake.Shell.info "==> Removing toolchain #{toolchain_path}"
+              File.rm_rf!(toolchain_path)
+            else
+              Bake.Shell.error_exit "Toolchain #{username}-#{toolchain_tuple}-#{host_platform}-#{host_arch} not downloaded"
+            end
         end
-      else
-        Bake.Shell.info "System #{recipe}-#{version} not downloaded"
-      end
-    end)
-    Bake.Shell.info "=> Finished"
+      end)
+    end
   end
 
 end
