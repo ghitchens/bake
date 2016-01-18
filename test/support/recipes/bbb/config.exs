@@ -8,7 +8,7 @@ description """
 Minimal install image for BeagleBone Black
 """
 
-version "0.0.1"
+version "0.1.0"
 maintainers [
   "Justin Schneck"
 ]
