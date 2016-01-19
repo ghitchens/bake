@@ -39,7 +39,7 @@ defmodule Bake.Mixfile do
       {:sweet_xml, "~> 0.2"},
       {:httpoison, "~> 0.7"},
       {:ex_aws, "~> 0.4.11"},
-      {:phoenix_channel_client, path: "../phoenix_channel_client"}
+      {:phoenix_channel_client, github: "mobileoverlord/phoenix_channel_client"}
     ]
   end
 
