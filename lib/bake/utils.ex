@@ -14,7 +14,7 @@ defmodule Bake.Utils do
 
   def bake_home do
     if Process.whereis(Bake.State) do
-	    Bake.State.fetch!(:home)
+	    Bake.State.fetch!(:bake_home)
     else
       Path.expand(System.get_env("BAKE_HOME") || @bake_home)
     end

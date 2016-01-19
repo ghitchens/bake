@@ -3,6 +3,8 @@ defmodule Bake.Cli.SystemTest do
   import Bake.Cli.Menu
   require Logger
 
+  @moduletag :integration
+
   setup do
     opts = %{
       bakefile: "test/support/Bakefile",
@@ -12,6 +14,7 @@ defmodule Bake.Cli.SystemTest do
   end
 
   test "Get system for a target", context do
+
     target = Map.get(context.opts, :target)
     |> String.to_atom
 
@@ -31,7 +34,13 @@ defmodule Bake.Cli.SystemTest do
 
     lock_file = Bake.Config.Lock.read(lock_path)
     lock_targets = lock_file[:targets]
+    Logger.debug "Get System"
     assert ["#{system.username}/#{system.name}": system.version] == Keyword.get(lock_targets, target)
+  end
+
+  test "Update system", context do
+    target = Map.get(context.opts, :target)
+    assert [{target, :noaction}] == Bake.Cli.System.update(context.opts)
   end
 
   test "Clean all systems", context do
@@ -53,7 +62,5 @@ defmodule Bake.Cli.SystemTest do
       Bake.Cli.System.clean(opts)
     end
   end
-
-  #TODO Test update system
 
 end
