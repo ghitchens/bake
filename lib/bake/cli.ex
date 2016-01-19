@@ -1,5 +1,5 @@
 defmodule Bake.Cli do
-  @switches [version: :string]
+  @switches [version: :boolean]
   @menu "bake"
 
   use Bake.Cli.Menu
