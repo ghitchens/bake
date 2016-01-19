@@ -63,7 +63,15 @@ Clear global default_target
 bake global clear default_target
 ```
 
-Using the global API, you can set / get / clear any global value for bake
+Using the global API, you can set / get / clear any global value for bake.
+
+####Important Note:
+The target will be chosen from the following order of importance
+source      | value
+------------|-----------------------------------------
+`--target`  | string
+Bakefile    | default_target
+Global      | default_target
 
 ### Recipes
 The recipe needs to be an active bakeware shared recipe.
