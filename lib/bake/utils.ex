@@ -9,6 +9,18 @@ defmodule Bake.Utils do
     @cli_version
   end
 
+  def daemon_running? do
+    case File.read(BakeUtils.daemon_pid) do
+      {:ok, pid} ->
+        :os.cmd(String.to_char_list("kill -0 #{pid}")) == []
+      _ -> false
+    end
+  end
+
+  def daemon_port do
+    System.get_env("BAKE_HOME") || @daemon_port
+  end
+
   def escript_path do
     @escript_path
   end

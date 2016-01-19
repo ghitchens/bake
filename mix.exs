@@ -3,7 +3,7 @@ defmodule Bake.Mixfile do
 
   def project do
     [app: :bake,
-     version: "0.2.0-dev",
+     version: "0.1.3-dev",
      elixir: "~> 1.1",
      escript: [main_module: Bake.Cli, name: "bake", path: escript_path],
      build_embedded: Mix.env == :prod,
@@ -38,7 +38,8 @@ defmodule Bake.Mixfile do
       {:porcelain, "~> 2.0"},
       {:sweet_xml, "~> 0.2"},
       {:httpoison, "~> 0.7"},
-      {:ex_aws, "~> 0.4.11"}
+      {:ex_aws, "~> 0.4.11"},
+      {:phoenix_channel_client, path: "../phoenix_channel_client"}
     ]
   end
 

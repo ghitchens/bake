@@ -1,6 +1,6 @@
 defmodule Bake.Cli.Daemon do
   @menu "daemon"
-  @switches [target: :string, all: :boolean]
+  @switches [target: :string, all: :boolean, foreground: :boolean]
 
   use Bake.Cli.Menu
 
@@ -15,33 +15,49 @@ defmodule Bake.Cli.Daemon do
 
   def main(args) do
     Bake.start
-    {_opts, cmd, _} = OptionParser.parse(args, switches: @switches)
+    {opts, cmd, _} = OptionParser.parse(args, switches: @switches)
     case cmd do
-      ["start"] -> start
+      ["start"] -> start(opts)
       ["stop"] -> stop
       ["running"] -> running
       _ -> invalid_cmd(cmd)
     end
   end
 
-  def start do
-    {ret, 0} = System.cmd("bake_d", ["running"])
-    if String.contains?(ret, "running on") do
-      Bake.Shell.info ret
+  def start(foreground: true) do
+    IO.puts "Foreground"
+    Bake.Daemon.start
+  end
+  def start(opts) do
+    if BakeUtils.daemon_running? do
+      Bake.Shell.info info_bake_running
     else
-      Port.open({:spawn, "bake_d"}, [])
-      Bake.Shell.info "bake daemon started"
+      result = Port.open({:spawn, "bake daemon start --foreground"}, [])
+
+      Bake.Shell.info "=> bake daemon started"
     end
   end
 
   def stop do
-    {ret, 0} = System.cmd("bake_d", ["stop"])
-    Bake.Shell.info ret
+    if BakeUtils.daemon_running? do
+      Bake.Shell.info "=> Stopping #{info_bake_running}"
+      Bake.Daemon.stop
+    else
+      Bake.Shell.info "=> bake daemon is not running"
+    end
+
   end
 
   def running do
-    {ret, 0} = System.cmd("bake_d", ["running"])
-    Bake.Shell.info ret
+    if BakeUtils.daemon_running? do
+      Bake.Shell.info info_bake_running
+    else
+      Bake.Shell.info "=> bake daemon is not running"
+    end
   end
+
+
+
+  defp info_bake_running, do: "=> bake daemon running on port #{inspect BakeUtils.daemon_port}"
 
 end
