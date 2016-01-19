@@ -8,25 +8,15 @@ defmodule Bake.Mixfile do
      escript: [main_module: Bake.Cli, name: "bake", path: escript_path],
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
+     elixirc_options: elixirc_options(Mix.env),
+     elixirc_paths: elixirc_paths(Mix.env),
      deps: deps]
   end
 
-  # Configuration for the OTP application
-  #
-  # Type "mix help compile.app" for more information
   def application do
-    [applications: [:logger, :httpoison, :poison, :crypto, :ssl, :ssh, :sshex, :mix, :conform, :porcelain]]
+    [applications: [:logger, :httpoison, :poison, :crypto, :ssl, :ssh, :sshex, :mix, :conform, :porcelain, :phoenix_channel_client],mod: {Bake, []}]
   end
 
-  # Dependencies can be Hex packages:
-  #
-  #   {:mydep, "~> 0.3.0"}
-  #
-  # Or git/path repositories:
-  #
-  #   {:mydep, git: "https://github.com/elixir-lang/mydep.git", tag: "0.1.0"}
-  #
-  # Type "mix help deps" for more examples and options
   defp deps do
     [
       {:httpoison, "~> 0.8.0"},
@@ -43,6 +33,12 @@ defmodule Bake.Mixfile do
     ]
   end
 
+  defp elixirc_options(:prod), do: [debug_info: false]
+  defp elixirc_options(_),     do: []
+
+  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(_),     do: ["lib"]
+
   defp escript_path do
     {platform, 0} = System.cmd("uname", ["-s"])
     platform
@@ -51,7 +47,8 @@ defmodule Bake.Mixfile do
     |> escript_platform
   end
 
-  defp escript_platform(<<"darwin", _tail :: binary >>), do: "/usr/local/bin/bake"
-  defp escript_platform(_), do: Path.expand("~/.bake/bin/bake")
+  defp escript_platform(<<"darwin", _tail :: binary >>), do: "/usr/local/bin/#{escript_name}"
+  defp escript_platform(_), do: Path.expand("~/.bake/bin/#{escript_name}")
+  defp escript_name, do: "bake"
 
 end

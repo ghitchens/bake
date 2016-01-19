@@ -5,9 +5,16 @@ defmodule Bake.Adapters.Nerves do
   @nerves_home System.get_env("NERVES_HOME") || "~/.nerves"
 
   require Logger
+  defp nerves_home do
+    if Process.whereis(Bake.State) do
+	    Bake.State.fetch!(:nerves_home)
+    else
+      Path.expand(System.get_env("NERVES_HOME") || @nerves_home)
+    end
+  end
 
-  def systems_path, do: "#{@nerves_home}/systems/" |> Path.expand
-  def toolchains_path, do: "#{@nerves_home}/toolchains/" |> Path.expand
+  def systems_path, do: "#{nerves_home}/systems/" |> Path.expand
+  def toolchains_path, do: "#{nerves_home}/toolchains/" |> Path.expand
 
   def firmware(bakefile_path, config, target, otp_name) do
     otp_app_path = Path.dirname(bakefile_path)

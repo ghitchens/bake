@@ -1,1 +1,2 @@
-%{"bbb": {"nerves/bbb", "0.0.1"}, "rpi2": {"nerves/rpi2", "0.0.1"}}
+{targets,[{rpi,[{'nerves/rpi',<<"0.1.0">>}]},
+          {bbb,[{'nerves/bbb',<<"0.1.0">>}]}]}.

@@ -1,0 +1,15 @@
+use Bake.Config
+
+platform :nerves
+
+target :bbb,
+  recipe: {"nerves/bbb", "~> 0.1.0"}
+
+target :rpi,
+  recipe: {"nerves/rpi", "~> 0.1.0"}
+
+target :rpi2,
+  recipe: {"nerves/rpi2", "~> 0.1.0"}
+
+target :galileo,
+  recipe: {"nerves/galileo", "~> 0.1.0"}

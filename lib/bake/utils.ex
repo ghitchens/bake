@@ -13,7 +13,11 @@ defmodule Bake.Utils do
   end
 
   def bake_home do
-    Path.expand(System.get_env("BAKE_HOME") || @bake_home)
+    if Process.whereis(Bake.State) do
+	    Bake.State.fetch!(:home)
+    else
+      Path.expand(System.get_env("BAKE_HOME") || @bake_home)
+    end
   end
 
   def daemon_running? do
