@@ -95,11 +95,15 @@ defmodule Bake.Cli.System do
           Bake.Shell.info "==> System #{username}/#{name}-#{version} downloaded"
           dir = adapter.systems_path <> "/#{username}"
           File.mkdir_p(dir)
-          File.write!("#{dir}/#{name}-#{version}.tar.gz", tar)
-          Bake.Shell.info "=> Unpacking system #{username}/#{name}-#{version}"
-          System.cmd("tar", ["zxf", "#{name}-#{version}.tar.gz"], cd: dir)
-          File.rm!("#{dir}/#{name}-#{version}.tar.gz")
-          Bake.Config.Lock.update(lock_file, [targets: [{target, ["#{username}/#{name}": version]}]])
+          Bake.Shell.info "==> Unpacking system #{username}/#{name}-#{version}"
+
+          case :erl_tar.extract({:binary, tar}, [{:cwd, dir}, :compressed]) do
+            :ok -> Bake.Config.Lock.update(lock_file, [targets: [{target, ["#{username}/#{name}": version]}]])
+            {:error, _} ->
+              Bake.Shell.error_exit """
+              Error extracting system #{username}/#{name}-#{version}
+              """
+          end
         {_, response} ->
           Bake.Shell.error("Failed to download system")
           Bake.Utils.print_response_result(response)

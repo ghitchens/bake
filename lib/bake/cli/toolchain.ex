@@ -54,20 +54,25 @@ defmodule Bake.Cli.Toolchain do
               """
             [{recipe, version}] ->
               system_path = "#{adapter.systems_path}/#{recipe}-#{version}"
-              {:ok, system_config} = "#{system_path}/recipe.exs"
-              |> Bake.Config.Recipe.read!
-
-              {username, tuple, version} = system_config[:toolchain]
-              host_platform = BakeUtils.host_platform
-              host_arch = BakeUtils.host_arch
-              toolchain = "#{username}-#{tuple}-#{host_platform}-#{host_arch}-v#{version}"
-              toolchain_path = "#{adapter.toolchains_path}/#{toolchain}"
-              if File.dir?(toolchain_path) do
-                Bake.Shell.info "=> Toolchain #{toolchain} up to date"
-              else
-                Bake.Shell.info "=> Downloading toolchain for target #{target}"
-                Bake.Api.Toolchain.get(%{tuple: tuple, username: username, version: version})
-                |> get_resp(platform: platform, adapter: adapter)
+              case Bake.Config.Recipe.read!("#{system_path}/recipe.exs") do
+                {:ok, system_config} ->
+                  {username, tuple, version} = system_config[:toolchain]
+                  host_platform = BakeUtils.host_platform
+                  host_arch = BakeUtils.host_arch
+                  toolchain = "#{username}-#{tuple}-#{host_platform}-#{host_arch}-v#{version}"
+                  toolchain_path = "#{adapter.toolchains_path}/#{toolchain}"
+                  if File.dir?(toolchain_path) do
+                    Bake.Shell.info "==> Toolchain #{toolchain} up to date"
+                  else
+                    Bake.Shell.info "==> Downloading toolchain for target #{target}"
+                    Bake.Api.Toolchain.get(%{tuple: tuple, username: username, version: version})
+                    |> get_resp(platform: platform, adapter: adapter)
+                  end
+                {:error, _} ->
+                  Bake.Shell.error_exit """
+                  System #{recipe} not downloaded. Please download the system first by running: "
+                  > bake system get --target #{target}
+                  """
               end
           end
       end)
@@ -84,16 +89,27 @@ defmodule Bake.Cli.Toolchain do
     %{data: %{path: path, host: host, target_tuple: tuple, username: username}} = Poison.decode!(body, keys: :atoms)
 
     adapter = opts[:adapter]
+
     case Bake.Api.request(:get, host <> "/" <> path, []) do
       {:ok, %{status_code: code, body: tar}} when code in 200..299 ->
         Bake.Shell.info "==> Toolchain #{username}/#{tuple} Downloaded"
         dir = adapter.toolchains_path
         File.mkdir_p(dir)
-        File.write!("#{dir}/#{tuple}.tar.gz", tar)
-        Bake.Shell.info "=> Unpacking toolchain #{username}/#{tuple}"
-        System.cmd("tar", ["xf", "#{tuple}.tar.gz"], cd: dir)
-        File.rm!("#{dir}/#{tuple}.tar.gz")
-
+        Bake.Shell.info "==> Unpacking toolchain #{username}/#{tuple}"
+        case :erl_tar.extract({:binary, tar}, [{:cwd, dir}, :compressed]) do
+          :ok -> nil
+          {:error, error} ->
+            File.write!("#{dir}/#{tuple}.tar.xz", tar)
+            case System.cmd("tar", ["xf", "#{tuple}.tar.xz"], cd: dir) do
+              {_, 0} -> File.rm_rf("#{dir}/#{tuple}.tar.xz")
+              {error, code} ->
+                File.rm_rf("#{dir}/#{tuple}.tar.xz")
+                Logger.debug "Compression Error 2: #{inspect error} #{inspect code}"
+                Bake.Shell.error_exit """
+                Error extracting toolchain #{username}/#{tuple}
+                """
+            end
+        end
       {_, response} ->
         Logger.debug "Response: #{inspect response}"
         Bake.Shell.info "Failed to download toolchain"
