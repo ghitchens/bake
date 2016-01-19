@@ -49,10 +49,7 @@ defmodule Bake.Cli.Toolchain do
             nil ->
               # Target is not locked, download latest version
               {recipe, _} = v[:recipe]
-              Bake.Shell.error_exit """
-              System #{recipe} not downloaded. Please download the system first by running: "
-              > bake system get --target #{target}
-              """
+              Bake.Shell.warn warn_system(target)
             [{recipe, version}] ->
               system_path = "#{adapter.systems_path}/#{recipe}-#{version}"
               case Bake.Config.Recipe.read!("#{system_path}/recipe.exs") do
@@ -70,10 +67,7 @@ defmodule Bake.Cli.Toolchain do
                     |> get_resp(platform: platform, adapter: adapter)
                   end
                 {:error, _} ->
-                  Bake.Shell.error_exit """
-                  System #{recipe} not downloaded. Please download the system first by running: "
-                  > bake system get --target #{target}
-                  """
+                  Bake.Shell.warn warn_system(target)
               end
           end
       end)
@@ -103,16 +97,14 @@ defmodule Bake.Cli.Toolchain do
             File.write!("#{dir}/#{tuple}.tar.xz", tar)
             case System.cmd("tar", ["xf", "#{tuple}.tar.xz"], cd: dir) do
               {_, 0} -> File.rm_rf("#{dir}/#{tuple}.tar.xz")
-              {error, code} ->
+              {_error, _code} ->
                 File.rm_rf("#{dir}/#{tuple}.tar.xz")
-                Logger.debug "Compression Error 2: #{inspect error} #{inspect code}"
                 Bake.Shell.error_exit """
                 Error extracting toolchain #{username}/#{tuple}
                 """
             end
         end
       {_, response} ->
-        Logger.debug "Response: #{inspect response}"
         Bake.Shell.info "Failed to download toolchain"
         Bake.Utils.print_response_result(response)
         Bake.Shell.error_exit "Please chect to ensure that this toolchain is available for your host"
@@ -154,30 +146,35 @@ defmodule Bake.Cli.Toolchain do
         Bake.Shell.info "=> Cleaning toolchain for target #{target}"
         case Keyword.get(lock_targets, target) do
           nil ->
-            Bake.Shell.warn """
-            System not downloaded. Please download the system first by running: "
-            > bake system get --target #{target}
-            """
-            Bake.Shell.error_exit ""
+            Bake.Shell.warn warn_system(target)
           [{recipe, version}] ->
             system_path = "#{adapter.systems_path}/#{recipe}-#{version}"
-            {:ok, system_config} = "#{system_path}/recipe.exs"
-            |> Bake.Config.Recipe.read!
-
-            {username, toolchain_tuple, version} = system_config[:toolchain]
-            host_platform = Bake.Utils.host_platform
-            host_arch = Bake.Utils.host_arch
-            toolchain_name = "#{username}-#{toolchain_tuple}-#{host_platform}-#{host_arch}-v#{version}"
-            toolchain_path = "#{adapter.toolchains_path}/#{toolchain_name}"
-            if File.dir?(toolchain_path) do
-              Bake.Shell.info "==> Removing toolchain #{toolchain_path}"
-              File.rm_rf!(toolchain_path)
-            else
-              Bake.Shell.error_exit "Toolchain #{username}-#{toolchain_tuple}-#{host_platform}-#{host_arch} not downloaded"
+            case Bake.Config.Recipe.read!("#{system_path}/recipe.exs") do
+              {:ok, system_config} ->
+                {username, toolchain_tuple, version} = system_config[:toolchain]
+                host_platform = Bake.Utils.host_platform
+                host_arch = Bake.Utils.host_arch
+                toolchain_name = "#{username}-#{toolchain_tuple}-#{host_platform}-#{host_arch}-v#{version}"
+                toolchain_path = "#{adapter.toolchains_path}/#{toolchain_name}"
+                if File.dir?(toolchain_path) do
+                  Bake.Shell.info "==> Removing toolchain #{toolchain_path}"
+                  File.rm_rf!(toolchain_path)
+                else
+                  Bake.Shell.error_exit "Toolchain #{username}-#{toolchain_tuple}-#{host_platform}-#{host_arch} not downloaded"
+                end
+              {_, _error} ->
+                Bake.Shell.warn warn_system(target)
             end
         end
       end)
     end
+  end
+
+  defp warn_system(target) do
+    """
+    System not downloaded. Please download the system first by running:
+    > bake system get --target #{target}
+    """
   end
 
 end

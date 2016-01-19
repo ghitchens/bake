@@ -82,13 +82,10 @@ defmodule Bake.Cli.System do
 
   defp get_resp({:ok, %{status_code: code, body: body}}, opts) when code in 200..299 do
     %{data: %{path: path, host: host, name: name, version: version, username: username} = system} = Poison.decode!(body, keys: :atoms)
-    Logger.debug "System: #{inspect host <> "/" <> path}"
     adapter = opts[:adapter]
     system_path = "#{adapter.systems_path}/#{username}/#{name}-#{version}"
     lock_file = opts[:lock_file]
     target = opts[:target]
-    Logger.debug "System Path: #{inspect system_path}"
-    Logger.debug "#{inspect File.dir?(system_path)}"
     if File.dir?(system_path) do
       Bake.Shell.info "==> System #{username}/#{name} at #{version} up to date"
       Bake.Config.Lock.update(lock_file, [targets: [{target, ["#{username}/#{name}": version]}]])
@@ -122,7 +119,6 @@ defmodule Bake.Cli.System do
   end
 
   defp get_resp({_, response}, _platform) do
-    Logger.debug "System Response: #{inspect response}"
     Bake.Shell.error("Failed to download system")
     Bake.Utils.print_response_result(response)
     :error
