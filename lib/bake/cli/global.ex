@@ -24,7 +24,7 @@ defmodule Bake.Cli.Global do
   end
 
   def set(variable, value) do
-    Bake.Shell.info "=> Setting global variable #{variable} to #{value}"
+    Bake.Shell.info "=> Set global variable #{variable} to #{value}"
     BakeUtils.Cli.Config.update([{String.to_atom(variable), value}])
   end
 

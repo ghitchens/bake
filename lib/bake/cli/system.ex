@@ -36,7 +36,7 @@ defmodule Bake.Cli.System do
     lock_path = lock_path <> "/Bakefile.lock"
 
     Enum.each(target_config[:target], fn({target, v}) ->
-      Bake.Shell.info "=> Checking system for target #{target}"
+      Bake.Shell.info "=> Get system for target #{target}"
       if File.exists?(lock_path) do
         # The exists. Check to see if it contains a lock for our target
         lock_file = Bake.Config.Lock.read(lock_path)
@@ -86,13 +86,13 @@ defmodule Bake.Cli.System do
     target = opts[:target]
 
     if File.dir?(system_path) do
-      Bake.Shell.info "=> System #{username}/#{name} at #{version} up to date"
+      Bake.Shell.info "==> System #{username}/#{name} at #{version} up to date"
       Bake.Config.Lock.update(lock_file, [targets: [{target, ["#{username}/#{name}": version]}]])
     else
-      Bake.Shell.info "=> Downloading system #{username}/#{name}-#{version}"
+      Bake.Shell.info "==> Downloading system #{username}/#{name}-#{version}"
       case Bake.Api.request(:get, host <> "/" <> path, []) do
         {:ok, %{status_code: code, body: tar}} when code in 200..299 ->
-          Bake.Shell.info "=> System #{username}/#{name}-#{version} downloaded"
+          Bake.Shell.info "==> System #{username}/#{name}-#{version} downloaded"
           dir = adapter.systems_path <> "/#{username}"
           File.mkdir_p(dir)
           File.write!("#{dir}/#{name}-#{version}.tar.gz", tar)
@@ -116,7 +116,7 @@ defmodule Bake.Cli.System do
     {_bakefile_path, target_config, _target} = bakefile(opts[:bakefile], opts[:target])
     platform = target_config[:platform]
     adapter = adapter(platform)
-    Bake.Shell.info "You are about to clean all systems for #{platform}"
+    Bake.Shell.warn "You are about to clean all systems for #{platform}"
     if Bake.Shell.yes?("Proceed?") do
       File.rm_rf!(adapter.systems_path)
       Bake.Shell.info "All #{platform} systems have been removed"
@@ -140,7 +140,7 @@ defmodule Bake.Cli.System do
         lock_targets = lock_file[:targets]
         case Keyword.get(lock_targets, target) do
           nil ->
-            Bake.Shell.info "Target does not contain locked #{recipe}"
+            Bake.Shell.error_exit "Target does not contain locked #{recipe}"
           [{recipe, version}] ->
             system_path = adapter.systems_path <> "/#{recipe}-#{version}"
             if File.dir?(system_path) do
@@ -148,12 +148,12 @@ defmodule Bake.Cli.System do
               Bake.Shell.info "==> Removing system #{recipe}-#{version}"
               File.rm_rf!(system_path)
             else
-              Bake.Shell.info "System #{recipe}-#{version} not downloaded"
+              Bake.Shell.error_exit "System #{recipe}-#{version} not downloaded"
             end
         end
       else
         # The lockfile doesn't exist. Download latest version
-        Bake.Shell.info "Target does not contain locked #{recipe}"
+        Bake.Shell.error_exit "Target does not contain locked #{recipe}"
       end
     end)
   end
