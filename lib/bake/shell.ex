@@ -5,6 +5,9 @@ defmodule Bake.Shell do
   def warn(output),
     do: Mix.shell.info([IO.ANSI.yellow, output, IO.ANSI.reset])
 
+  def system(output),
+    do: Mix.shell.info([IO.ANSI.green, output, IO.ANSI.reset])
+    
   def error(output),
     do: Mix.shell.error(output)
 

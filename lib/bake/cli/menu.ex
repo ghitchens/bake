@@ -40,7 +40,7 @@ defmodule Bake.Cli.Menu do
       def target(bakefile, "all") do
         targets = Enum.reduce(bakefile[:target], [], fn({target, _}, acc) ->  [target | acc] end)
         |> Enum.join(", ")
-        Bake.Shell.info "==> Performing action on all targets: #{targets}"
+        Bake.Shell.system "=> Performing action on all targets: #{targets}"
         :all
       end
       def target(bakefile, nil) do
@@ -69,12 +69,12 @@ defmodule Bake.Cli.Menu do
 
             Bake.Shell.error_exit error
           target ->
-            Bake.Shell.info "==> Using global default target: #{target}"
+            Bake.Shell.system "=> Using global default target: #{target}"
             target
         end
       end
       def default_target(_bakefile, target) do
-        Bake.Shell.info "==> Using project default target: #{target}"
+        Bake.Shell.system "=> Using project default target: #{target}"
         target
       end
 

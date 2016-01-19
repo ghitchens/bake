@@ -35,7 +35,7 @@ To use bake for compiling firmware for nerves apps you need to add a `Bakefile` 
 use Bake.Config
 
 platform :nerves
-# Optional
+# Optional / Overrides Global Target
 # default_target :rpi2
 
 target :rpi2,
@@ -43,6 +43,27 @@ target :rpi2,
 ```
 
 In this example we are telling `bake` that we want to be able to produce firmware for a raspberry pi2. The `Bakefile` needs at least 1 target defined, but you can specify as many targets as you want to build firmware for. The target atom can be anything you desire. It is used when executing commands as a label for your purposes. By declaring a `default_target` if we omit the `--target` flag in commands, the default target will be used.
+
+### Global Target
+
+Sometimes users may want to specify a default, global target that they will be deploying nerves projects to on their system. This is helpful when a user only owns a single target, like a raspberry pi2, and would like bake to choose this target when performing commands which require a target to be passed.
+
+Set global default_target
+```
+bake global set default_target rpi2
+```
+
+Get global default_target
+```
+bake global get default_target
+```
+
+Clear global default_target
+```
+bake global clear default_target
+```
+
+Using the global API, you can set / get / clear any global value for bake
 
 ### Recipes
 The recipe needs to be an active bakeware shared recipe.
