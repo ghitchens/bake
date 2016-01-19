@@ -4,7 +4,6 @@ defmodule Bake.Cli.Daemon do
 
   use Bake.Cli.Menu
 
-
   def menu do
     """
       start   - Starts the bake daemon
@@ -28,7 +27,7 @@ defmodule Bake.Cli.Daemon do
     IO.puts "Foreground"
     Bake.Daemon.start
   end
-  def start(opts) do
+  def start(_) do
     if Bake.Utils.daemon_running? do
       Bake.Shell.info info_bake_running
     else
@@ -55,8 +54,6 @@ defmodule Bake.Cli.Daemon do
       Bake.Shell.info "=> bake daemon is not running"
     end
   end
-
-
 
   defp info_bake_running, do: "bake daemon running on port #{inspect Bake.Utils.daemon_port}"
 

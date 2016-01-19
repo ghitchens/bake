@@ -24,7 +24,7 @@ defmodule Bake.Daemon.Channel.User do
     {:noreply, state}
   end
 
-  def handle_close(payload, state) do
+  def handle_close(_payload, state) do
     {:noreply, state}
   end
 end

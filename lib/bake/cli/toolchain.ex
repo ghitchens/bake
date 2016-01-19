@@ -98,7 +98,7 @@ defmodule Bake.Cli.Toolchain do
         Bake.Shell.info "==> Unpacking toolchain #{username}/#{tuple}"
         case :erl_tar.extract({:binary, tar}, [{:cwd, dir}, :compressed]) do
           :ok -> nil
-          {:error, error} ->
+          {:error, _error} ->
             File.write!("#{dir}/#{tuple}.tar.xz", tar)
             case System.cmd("tar", ["xf", "#{tuple}.tar.xz"], cd: dir) do
               {_, 0} -> File.rm_rf("#{dir}/#{tuple}.tar.xz")

@@ -10,7 +10,7 @@ defmodule Bake.Utils.Brew do
       {_, 0} = System.cmd("which", [package])
       true
     rescue
-      e -> false
+      _e -> false
     end
   end
 
