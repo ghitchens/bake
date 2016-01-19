@@ -23,13 +23,19 @@ defmodule Bake.Adapters.Nerves do
       {"NERVES_TARGET", to_string(target)},
       {"MIX_ENV", System.get_env("MIX_ENV") || "dev"}
     ]
+    cmd = """
+    bash -c "
+    source #{system_path}/nerves-env.sh || ( echo Fail; exit 1 )"
+    """
+    result = Porcelain.shell(cmd, env: env, out: stream)
 
+    if result.status != 0,
+      do: Bake.Shell.error_exit "Nerves could not initialize the environment. Please fix the issue and try again"
     # The Nerves scripts require bash. The native shell could be sh, so
     # invoke bash for the rest of the script. Note the single double-quote
     # to keep the command to bash together.
     cmd = """
     bash -c "
-    source #{system_path}/nerves-env.sh &&
     cd #{otp_app_path} &&
     mix local.hex --force &&
     mix local.rebar --force &&
