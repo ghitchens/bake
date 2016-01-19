@@ -25,11 +25,11 @@ defmodule Bake.Cli.Global do
 
   def set(variable, value) do
     Bake.Shell.info "=> Set global variable #{variable} to #{value}"
-    BakeUtils.Cli.Config.update([{String.to_atom(variable), value}])
+    Bake.Config.Global.update([{String.to_atom(variable), value}])
   end
 
   def get(variable) do
-    case BakeUtils.Cli.Config.read[String.to_atom(variable)] do
+    case Bake.Config.Global.read[String.to_atom(variable)] do
       nil -> Bake.Shell.info "=> Global variable #{variable} is not set"
       value -> Bake.Shell.info "=> Global variable #{variable}: #{value}"
     end
@@ -39,9 +39,9 @@ defmodule Bake.Cli.Global do
     case get(variable) do
       nil -> Bake.Shell.info "=> Global variable #{variable} is not set"
       _ ->
-        BakeUtils.Cli.Config.read
+        Bake.Config.Global.read
         |> Keyword.delete(String.to_atom(variable))
-        |> BakeUtils.Cli.Config.write
+        |> Bake.Config.Global.write
     end
   end
 

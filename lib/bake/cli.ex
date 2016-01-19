@@ -17,7 +17,7 @@ defmodule Bake.Cli do
       system      - Target system options
       toolchain   - Toolchain options
       firmware    - Target Firmware options
-      burn        - Install language helper functions
+      burn        - Burn firmware to SD / Image
     """
   end
 
@@ -62,9 +62,6 @@ defmodule Bake.Cli do
 
   def switch(cmd, _), do: invalid_cmd(cmd)
 
-  # def bake(args) do
-  #   Cli.Bake.main(args)
-  # end
   defp clean(opts) do
     {_, target_config, _target} = bakefile(opts[:bakefile], opts[:target])
     platform = target_config[:platform]
@@ -88,10 +85,9 @@ defmodule Bake.Cli do
 
   defp update({:ok, %{body: tar}}) do
     Bake.Shell.info "==> Unpacking Update"
-    %{"bake" => bake} = BakeUtils.Tar.unpack(tar, :compressed)
+    %{"bake" => bake} = Bake.Utils.Tar.unpack(tar, :compressed)
     File.write!(Bake.Utils.escript_path, bake)
     Bake.Shell.info "==> Update Complete"
-    #Logger.debug "Files: #{inspect files}"
   end
 
   defp update({_, error}) do

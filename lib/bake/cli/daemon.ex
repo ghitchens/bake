@@ -29,7 +29,7 @@ defmodule Bake.Cli.Daemon do
     Bake.Daemon.start
   end
   def start(opts) do
-    if BakeUtils.daemon_running? do
+    if Bake.Utils.daemon_running? do
       Bake.Shell.info info_bake_running
     else
       result = Port.open({:spawn, "bake daemon start --foreground"}, [])
@@ -39,7 +39,7 @@ defmodule Bake.Cli.Daemon do
   end
 
   def stop do
-    if BakeUtils.daemon_running? do
+    if Bake.Utils.daemon_running? do
       Bake.Shell.info "=> Stopping #{info_bake_running}"
       Bake.Daemon.stop
     else
@@ -49,8 +49,8 @@ defmodule Bake.Cli.Daemon do
   end
 
   def running do
-    if BakeUtils.daemon_running? do
-      Bake.Shell.info info_bake_running
+    if Bake.Utils.daemon_running? do
+      Bake.Shell.info "=> #{info_bake_running}"
     else
       Bake.Shell.info "=> bake daemon is not running"
     end
@@ -58,6 +58,6 @@ defmodule Bake.Cli.Daemon do
 
 
 
-  defp info_bake_running, do: "=> bake daemon running on port #{inspect BakeUtils.daemon_port}"
+  defp info_bake_running, do: "bake daemon running on port #{inspect Bake.Utils.daemon_port}"
 
 end

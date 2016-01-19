@@ -41,11 +41,11 @@ defmodule Bake.Daemon.Server do
   end
 
   def handle_cast(:join_channel, state) do
-    config = BakeUtils.Cli.Config.read
-    username = BakeUtils.local_user(config)
+    config = Bake.Config.Global.read
+    username = Bake.Utils.local_user(config)
     BakeDaemon.Channel.Socket.start_link
     {:ok, channel} = Phoenix.Channel.Client.channel(BakeDaemon.Channel.User, socket: BakeDaemon.Channel.Socket, topic: "user:#{username}")
-    auth = BakeUtils.auth_info(config)
+    auth = Bake.Utils.auth_info(config)
     BakeDaemon.Channel.User.join(channel, %{key: auth[:key]})
     {:noreply, %{state | channel: channel}}
   end

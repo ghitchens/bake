@@ -25,13 +25,13 @@ defmodule Bake.Cli.Recipe do
     recipe_config = System.cwd! <> "/recipe.exs"
     case Bake.Config.Recipe.read!(recipe_config) do
       {:ok, config} ->
-        cli_config = BakeUtils.Cli.Config.read
-        user = BakeUtils.local_user(cli_config)
+        cli_config = Bake.Config.Global.read
+        user = Bake.Utils.local_user(cli_config)
 
         Bake.Shell.info("Publishing #{user}/#{config[:name]} v#{config[:version]}")
         if Bake.Shell.yes?("Proceed?") do
-          tar = BakeUtils.Tar.pack(config)
-          auth = BakeUtils.auth_info(cli_config)
+          tar = Bake.Utils.Tar.pack(config)
+          auth = Bake.Utils.auth_info(cli_config)
           case Bake.Api.Recipe.publish(
             %{recipe_name: config[:name], user_name: user, content: tar},
             auth

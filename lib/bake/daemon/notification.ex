@@ -1,5 +1,5 @@
 defmodule Bake.Daemon.Notification do
-  import BakeUtils.Brew, only: [package_installed?: 1]
+  import Bake.Utils.Brew, only: [package_installed?: 1]
 
   defstruct title: "Bakeware", subtitle: "", message: "", open: nil
   #TODO

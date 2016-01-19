@@ -1,5 +1,5 @@
 defmodule Bake.Adapters.Nerves do
-  import BakeUtils.Cli.Config, only: [encode_term: 1, decode_term: 1, decode_elixir: 1]
+  import Bake.Config.Global, only: [encode_term: 1, decode_term: 1, decode_elixir: 1]
   @behaviour Bake.Adapter
 
   @nerves_home System.get_env("NERVES_HOME") || "~/.nerves"
@@ -25,18 +25,16 @@ defmodule Bake.Adapters.Nerves do
     ]
     cmd = """
     bash -c "
-    source #{system_path}/nerves-env.sh || ( echo Fail; exit 1 )"
+    source #{system_path}/nerves-env.sh || exit 1
     """
-    result = Porcelain.shell(cmd, env: env, out: stream)
+    result = Porcelain.shell(cmd <> ~s("), env: env, out: nil)
 
     if result.status != 0,
       do: Bake.Shell.error_exit "Nerves could not initialize the environment. Please fix the issue and try again"
     # The Nerves scripts require bash. The native shell could be sh, so
     # invoke bash for the rest of the script. Note the single double-quote
     # to keep the command to bash together.
-    cmd = """
-    bash -c "
-    cd #{otp_app_path} &&
+    cmd = cmd <> """
     mix local.hex --force &&
     mix local.rebar --force &&
     """
@@ -67,7 +65,7 @@ defmodule Bake.Adapters.Nerves do
     """ |> remove_newlines
 
 
-    result = Porcelain.shell(cmd, dir: system_path, env: env, out: stream)
+    result = Porcelain.shell(cmd, dir: otp_app_path, env: env, out: stream)
     if File.dir?("#{otp_app_path}/_build") and result.status == 0 do
       File.write!("#{otp_app_path}/_build/nerves_env", encode_term(env))
     end
@@ -149,8 +147,8 @@ defmodule Bake.Adapters.Nerves do
     #Logger.debug "System Config: #{inspect system_config}"
     # Toolchain
     {username, toolchain_tuple, toolchain_version} = system_config[:toolchain]
-    host_platform = BakeUtils.host_platform
-    host_arch = BakeUtils.host_arch
+    host_platform = Bake.Utils.host_platform
+    host_arch = Bake.Utils.host_arch
     toolchain_path = "#{toolchains_path}/#{username}-#{toolchain_tuple}-#{host_platform}-#{host_arch}-v#{toolchain_version}"
     Bake.Shell.info "==> Using Toolchain: #{username}-#{toolchain_tuple}-#{host_platform}-#{host_arch}-v#{toolchain_version}"
     # toolchains = File.ls!(toolchains_path)

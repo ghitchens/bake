@@ -2,7 +2,7 @@ defmodule Bake.Daemon.Api do
   @sock_opts [{:active, true}, :binary, {:packet, :raw}, {:delay_send, false}]
 
   def connect do
-    :gen_tcp.connect('127.0.0.1', BakeUtils.daemon_port, @sock_opts, 5000)
+    :gen_tcp.connect('127.0.0.1', Bake.Utils.daemon_port, @sock_opts, 5000)
   end
 
   def stop do

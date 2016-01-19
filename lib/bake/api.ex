@@ -6,8 +6,8 @@ defmodule Bake.Api do
   def request(method, url, headers, body \\ "") do
     default_headers = [
       "User-Agent": user_agent,
-      "x-bake-host-arch": BakeUtils.host_arch,
-      "x-bake-host-platform": BakeUtils.host_platform,
+      "x-bake-host-arch": Bake.Utils.host_arch,
+      "x-bake-host-platform": Bake.Utils.host_platform,
       "x-bake-version": Bake.Utils.cli_version
     ]
     headers = Keyword.merge(default_headers, headers)

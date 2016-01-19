@@ -49,7 +49,7 @@ defmodule Bake.Cli.Menu do
       def target(_, target), do: target
 
       def default_target(bakefile, nil) do
-        case BakeUtils.Cli.Config.read[:default_target] do
+        case Bake.Config.Global.read[:default_target] do
           target when target in ["", nil] ->
             error = """
             No target specified

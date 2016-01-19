@@ -2,7 +2,7 @@ defmodule Bake.Daemon.Message do
   require Logger
 
   def parse("/q") do
-    File.rm(BakeUtils.daemon_pid)
+    File.rm(Bake.Utils.daemon_pid)
     :erlang.halt
   end
 

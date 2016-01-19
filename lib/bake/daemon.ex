@@ -2,8 +2,8 @@ defmodule Bake.Daemon do
 
   def start do
     pid = :os.getpid
-    File.write!(BakeUtils.daemon_pid, to_string(pid))
-    Bake.Daemon.Server.start_link port: BakeUtils.daemon_port
+    File.write!(Bake.Utils.daemon_pid, to_string(pid))
+    Bake.Daemon.Server.start_link port: Bake.Utils.daemon_port
     unless iex_running?, do: :timer.sleep(:infinity)
   end
 
@@ -12,7 +12,7 @@ defmodule Bake.Daemon do
   end
 
   def running? do
-    case File.read(BakeUtils.daemon_pid) do
+    case File.read(Bake.Utils.daemon_pid) do
       {:ok, pid} ->
         :os.cmd(String.to_char_list("kill -0 #{pid}")) == []
       _ -> false

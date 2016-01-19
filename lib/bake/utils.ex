@@ -4,13 +4,20 @@ defmodule Bake.Utils do
 
   @cli_version Mix.Project.config[:version]
   @escript_path Mix.Project.config[:escript][:path]
+  @working_dir File.cwd! <> "/_bake"
+  @bake_home "~/.bake"
+  @daemon_port 10001
 
   def cli_version do
     @cli_version
   end
 
+  def bake_home do
+    Path.expand(System.get_env("BAKE_HOME") || @bake_home)
+  end
+
   def daemon_running? do
-    case File.read(BakeUtils.daemon_pid) do
+    case File.read(Bake.Utils.daemon_pid) do
       {:ok, pid} ->
         :os.cmd(String.to_char_list("kill -0 #{pid}")) == []
       _ -> false
@@ -19,6 +26,10 @@ defmodule Bake.Utils do
 
   def daemon_port do
     System.get_env("BAKE_HOME") || @daemon_port
+  end
+
+  def daemon_pid do
+    bake_home <> "/daemon.pid"
   end
 
   def escript_path do
@@ -79,7 +90,7 @@ defmodule Bake.Utils do
         key = Poison.decode!(body)
           |> Map.get("data")
           |> Map.get("key")
-        BakeUtils.Cli.Config.update(username: username, key: key)
+        Bake.Config.Global.update(username: username, key: key)
         :ok
       {_, response} ->
         Bake.Shell.error("API key generation failed")
@@ -117,6 +128,39 @@ defmodule Bake.Utils do
         IO.write :standard_error, "\e[2K\r#{prompt} "
         loop(prompt)
     end
+  end
+
+  def local_user(config) do
+    case Keyword.fetch(config, :username) do
+      {:ok, username} ->
+        username
+      :error ->
+        raise Bake.Error, message: "No user authorised on the local machine. Run `bake user auth` " <>
+                  "or create a new user with `bake user register`"
+    end
+  end
+
+  def auth_info(config \\ BakeUtils.Cli.Config.read) do
+    #Logger.debug "Config: #{inspect config}"
+    if key = config[:key] do
+      [key: key]
+    else
+      Bake.Shell.error "No authorized user found. Run 'bake user auth'"
+    end
+  end
+
+  def host_arch do
+    {arch, 0} = System.cmd("uname", ["-m"])
+    arch
+    |> String.strip
+    |> String.downcase
+  end
+
+  def host_platform do
+    {platform, 0} = System.cmd("uname", ["-s"])
+    platform
+    |> String.strip
+    |> String.downcase
   end
 
 end

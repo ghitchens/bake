@@ -57,8 +57,8 @@ defmodule Bake.Cli.Toolchain do
               case Bake.Config.Recipe.read!("#{system_path}/recipe.exs") do
                 {:ok, system_config} ->
                   {username, tuple, version} = system_config[:toolchain]
-                  host_platform = BakeUtils.host_platform
-                  host_arch = BakeUtils.host_arch
+                  host_platform = Bake.Utils.host_platform
+                  host_arch = Bake.Utils.host_arch
                   toolchain = "#{username}-#{tuple}-#{host_platform}-#{host_arch}-v#{version}"
                   toolchain_path = "#{adapter.toolchains_path}/#{toolchain}"
                   if File.dir?(toolchain_path) do
@@ -164,8 +164,8 @@ defmodule Bake.Cli.Toolchain do
             |> Bake.Config.Recipe.read!
 
             {username, toolchain_tuple, version} = system_config[:toolchain]
-            host_platform = BakeUtils.host_platform
-            host_arch = BakeUtils.host_arch
+            host_platform = Bake.Utils.host_platform
+            host_arch = Bake.Utils.host_arch
             toolchain_name = "#{username}-#{toolchain_tuple}-#{host_platform}-#{host_arch}-v#{version}"
             toolchain_path = "#{adapter.toolchains_path}/#{toolchain_name}"
             if File.dir?(toolchain_path) do
