@@ -16,7 +16,7 @@ defmodule Bake.Cli.System do
   def main(args) do
     Bake.start
     {opts, cmd, _} = OptionParser.parse(args, switches: @switches)
-
+    opts = Enum.into(opts, %{})
     case cmd do
       ["get"] -> get(opts)
       ["update"] -> update(opts)
@@ -25,9 +25,9 @@ defmodule Bake.Cli.System do
     end
   end
 
-  defp get(opts) do
+  def get(opts) do
     all_warn(opts)
-    {bakefile_path, target_config, _target} = bakefile(opts[:bakefile], opts[:target])
+    {bakefile_path, target_config, _target} = bakefile(Map.get(opts, :bakefile), Map.get(opts, :target))
     platform = target_config[:platform]
     adapter = adapter(platform)
 
@@ -60,9 +60,9 @@ defmodule Bake.Cli.System do
     end)
   end
 
-  defp update(opts) do
+  def update(opts) do
     all_warn(opts)
-    {bakefile_path, target_config, _target} = bakefile(opts[:bakefile], opts[:target])
+    {bakefile_path, target_config, _target} = bakefile(Map.get(opts, :bakefile), Map.get(opts, :target))
     platform = target_config[:platform]
     adapter = adapter(platform)
 
@@ -116,8 +116,8 @@ defmodule Bake.Cli.System do
     Bake.Utils.print_response_result(response)
   end
 
-  def clean([all: true] = opts) do
-    {_bakefile_path, target_config, _target} = bakefile(opts[:bakefile], opts[:target])
+  def clean(%{all: true} = opts) do
+    {_bakefile_path, target_config, _target} = bakefile(Map.get(opts, :bakefile), Map.get(opts, :target))
     platform = target_config[:platform]
     adapter = adapter(platform)
     Bake.Shell.warn "You are about to clean all systems for #{platform}"
@@ -128,7 +128,7 @@ defmodule Bake.Cli.System do
   end
 
   def clean(opts) do
-    {bakefile_path, target_config, _target} = bakefile(opts[:bakefile], opts[:target])
+    {bakefile_path, target_config, _target} = bakefile(Map.get(opts, :bakefile), Map.get(opts, :target))
     platform = target_config[:platform]
     adapter = adapter(platform)
 

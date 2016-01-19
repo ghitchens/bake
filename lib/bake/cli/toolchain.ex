@@ -14,6 +14,7 @@ defmodule Bake.Cli.Toolchain do
   def main(args) do
     Bake.start
     {opts, cmd, _} = OptionParser.parse(args, switches: @switches)
+    opts = Enum.into(opts, %{})
     case cmd do
       ["get"] -> get(opts)
       ["clean"] -> clean(opts)

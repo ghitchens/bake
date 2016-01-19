@@ -13,6 +13,7 @@
   "idna": {:hex, :idna, "1.0.3"},
   "mimerl": {:hex, :mimerl, "1.0.2"},
   "neotoma": {:hex, :neotoma, "1.7.3"},
+  "phoenix_channel_client": {:git, "https://github.com/mobileoverlord/phoenix_channel_client.git", "6a9e55dab722b1c40d73e0767d1ffcadf3337d0f", []},
   "poison": {:hex, :poison, "1.5.0"},
   "porcelain": {:hex, :porcelain, "2.0.1"},
   "providers": {:hex, :providers, "1.4.1"},

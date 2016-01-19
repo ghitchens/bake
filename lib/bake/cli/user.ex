@@ -18,7 +18,7 @@ defmodule Bake.Cli.User do
   def main(args) do
     Bake.start
     {opts, cmd, _} = OptionParser.parse(args, switches: @switches)
-
+    opts = Enum.into(opts, %{})
     case cmd do
       ["register"] -> register(opts)
       ["whoami"] -> whoami

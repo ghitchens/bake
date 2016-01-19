@@ -5,6 +5,7 @@
 * Users can set default_target globally
 * Added bake help. In addition to displaying option menus when the command is invalid, a user can ask for more information about a module, `bake help system` will show more informations like systems
 * Added ability to clean all systems and toolchains by passing --all to `bake system clean --all` and `bake toolchain clean --all`
+* Consolidated BakeUtils and BakeDaemon into Bake. 
 
 ### Bug Fixes
 * Nerves adapter checks return status of environment source and will exit on error.
