@@ -116,7 +116,7 @@ defmodule Bake.Cli.Toolchain do
     Bake.Utils.print_response_result(response)
   end
 
-  def clean([all: true] = opts) do
+  def clean(%{all: true} = opts) do
     {_bakefile_path, target_config, _target} = bakefile(opts[:bakefile], opts[:target])
     platform = target_config[:platform]
     adapter = adapter(platform)
