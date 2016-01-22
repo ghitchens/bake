@@ -30,7 +30,7 @@ defmodule Bake.Cli.User do
   end
 
   defp register(opts) do
-    clean? = Keyword.get(opts, :clean_pass, true)
+    clean? = Map.get(opts, :clean_pass, true)
 
     username = Bake.Shell.prompt("Username:")  |> String.strip
     email    = Bake.Shell.prompt("Email:")     |> String.strip
@@ -81,7 +81,7 @@ defmodule Bake.Cli.User do
   end
 
   defp create_key(opts) do
-    clean? = Keyword.get(opts, :clean_pass, true)
+    clean? = Map.get(opts, :clean_pass, true)
 
     username = Bake.Shell.prompt("Username:")
       |> String.strip
