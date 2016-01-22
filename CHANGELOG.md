@@ -1,6 +1,6 @@
 # Release Notes
 
-## Bake 0.2.0-dev
+## Bake 0.2.0
 ### Enhancements
 * Users can set default_target globally
 * Added bake help. In addition to displaying option menus when the command is invalid, a user can ask for more information about a module, `bake help system` will show more informations like systems
