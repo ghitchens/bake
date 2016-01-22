@@ -3,9 +3,9 @@ defmodule Bake.Mixfile do
 
   def project do
     [app: :bake,
-     version: "0.2.0-dev",
+     version: "0.2.0",
      elixir: "~> 1.1",
-     escript: [main_module: Bake.Cli, name: "bake", path: escript_path],
+     escript: [main_module: Bake.Cli, name: escript_name, path: escript_path],
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
      elixirc_options: elixirc_options(Mix.env),
@@ -24,9 +24,8 @@ defmodule Bake.Mixfile do
       {:exrm, "~> 0.19.8"},
       {:git_cli, "~> 0.1.0"},
       {:sshex, "~> 1.3"},
-      #{:bake_utils, path: "../bake_utils"},
       {:porcelain, "~> 2.0"},
-      {:sweet_xml, "~> 0.2"},
+      {:sweet_xml, "~> 0.5"},
       {:httpoison, "~> 0.7"},
       {:ex_aws, "~> 0.4.11"},
       {:phoenix_channel_client, github: "mobileoverlord/phoenix_channel_client"}

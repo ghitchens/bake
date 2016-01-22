@@ -38,8 +38,15 @@ defmodule Bake.Cli.SystemTest do
     assert ["#{system.username}/#{system.name}": system.version] == Keyword.get(lock_targets, target)
   end
 
-  test "Update system", context do
+  test "Update unavailable for system", context do
     target = Map.get(context.opts, :target)
+    |> String.to_atom
+
+    {bakefile_path, target_config, _target} = bakefile(Map.get(context.opts, :bakefile), target)
+    platform = target_config[:platform]
+    adapter = adapter(platform)
+
+    {:bbb, system} = Bake.Cli.System.get(context.opts)
     assert [{target, :noaction}] == Bake.Cli.System.update(context.opts)
   end
 
