@@ -1,5 +1,9 @@
 # Release Notes
 
+## Bake 0.2.1
+### Bug Fixes
+* Stopped using erl_tar and depend on system tar instead
+
 ## Bake 0.2.0
 ### Enhancements
 * Users can set default_target globally
