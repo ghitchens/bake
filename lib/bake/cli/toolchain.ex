@@ -91,18 +91,14 @@ defmodule Bake.Cli.Toolchain do
         dir = adapter.toolchains_path
         File.mkdir_p(dir)
         Bake.Shell.info "==> Unpacking toolchain #{username}/#{tuple}"
-        case :erl_tar.extract({:binary, tar}, [{:cwd, dir}, :compressed]) do
-          :ok -> nil
-          {:error, _error} ->
-            File.write!("#{dir}/#{tuple}.tar.xz", tar)
-            case System.cmd("tar", ["xf", "#{tuple}.tar.xz"], cd: dir) do
-              {_, 0} -> File.rm_rf("#{dir}/#{tuple}.tar.xz")
-              {_error, _code} ->
-                File.rm_rf("#{dir}/#{tuple}.tar.xz")
-                Bake.Shell.error_exit """
-                Error extracting toolchain #{username}/#{tuple}
-                """
-            end
+        File.write!("#{dir}/#{tuple}.tar.xz", tar)
+        case System.cmd("tar", ["xf", "#{tuple}.tar.xz"], cd: dir) do
+          {_, 0} -> File.rm_rf("#{dir}/#{tuple}.tar.xz")
+          {_error, _code} ->
+            File.rm_rf("#{dir}/#{tuple}.tar.xz")
+            Bake.Shell.error_exit """
+            Error extracting toolchain #{username}/#{tuple}
+            """
         end
       {_, response} ->
         Bake.Shell.info "Failed to download toolchain"
