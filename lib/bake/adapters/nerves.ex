@@ -7,7 +7,7 @@ defmodule Bake.Adapters.Nerves do
   require Logger
   defp nerves_home do
     if Process.whereis(Bake.State) do
-	    Bake.State.fetch!(:nerves_home)
+      Bake.State.fetch!(:nerves_home)
     else
       Path.expand(System.get_env("NERVES_HOME") || @nerves_home)
     end
@@ -56,7 +56,9 @@ defmodule Bake.Adapters.Nerves do
             {:ok, term} -> term
             {:error, _} -> decode_elixir(file)
           end
-          unless build_env[:"NERVES_TARGET"] == to_string(target) do
+
+          build_target = to_keyword_list(build_env)[:NERVES_TARGET]
+          unless build_target == to_string(target) do
             cmd = clean_target(cmd)
           end
         _ -> cmd = clean_target(cmd)
@@ -175,5 +177,9 @@ defmodule Bake.Adapters.Nerves do
     mix deps.get &&
     mix deps.compile &&
     """
+  end
+
+  defp to_keyword_list(build_env) do
+    Enum.map(build_env, fn {k, v} -> {String.to_atom(k), v})
   end
 end
