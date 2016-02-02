@@ -180,6 +180,6 @@ defmodule Bake.Adapters.Nerves do
   end
 
   defp to_keyword_list(build_env) do
-    Enum.map(build_env, fn {k, v} -> {String.to_atom(k), v})
+    Enum.map(build_env, fn {k, v} -> {String.to_atom(k), v} end)
   end
 end
