@@ -24,6 +24,7 @@ defmodule Bake.Api do
     ) |> response
   end
 
+  def response({:error, _} = response), do: response
   def response({:ok, %{headers: headers}} = response) do
     update = Enum.find(headers, fn({header, _}) -> String.downcase(header) == "x-bake-version" end)
     if update != nil do
