@@ -12,15 +12,17 @@ defmodule Bake.Cli.Burn do
   end
 
   def main(args) do
-    {opts, _, _} = OptionParser.parse(args, switches: @switches)
+    {opts, _, fwup_opts} = OptionParser.parse(args, switches: @switches)
     opts = Enum.into(opts, %{})
-    Logger.debug "Opts: #{inspect opts}"
+    fwup_opts = Enum.reduce(fwup_opts, "", fn({k, v}, acc) -> "#{acc} #{k} #{v}" end)
+
     {bakefile_path, target_config, target} = bakefile(Map.get(opts, :bakefile), Map.get(opts, :target))
     platform = target_config[:platform]
-    Logger.debug "Target Config: #{inspect target_config}"
+
     otp_name = Path.dirname(bakefile_path) |> String.split("/") |> List.last
     adapter = adapter(platform)
-    adapter.burn(bakefile_path, target_config, target, otp_name)
+
+    adapter.burn(bakefile_path, target_config, target, otp_name, fwup_opts)
   end
 
 end

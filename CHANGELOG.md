@@ -1,5 +1,14 @@
 # Release Notes
 
+## Bake 0.2.2
+### Enhancements
+* Added Bake burn with support from fwup 0.5.1
+* All unmatched options passed to bake burn will be forwarded to fwup
+
+### Bug Fixes
+* Persist deps between bake firmware commands
+* Enabled support for standard_io input into commands like bake firmware
+
 ## Bake 0.2.1
 ### Bug Fixes
 * Stopped using erl_tar and depend on system tar instead
