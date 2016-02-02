@@ -74,7 +74,7 @@ defmodule Bake.Adapters.Nerves do
     """ |> remove_newlines
 
 
-    result = Porcelain.shell(cmd, dir: otp_app_path, env: env, out: stream)
+    result = Porcelain.shell(cmd, dir: otp_app_path, env: env, in: stream, async_in: true, out: stream)
     if File.dir?("#{otp_app_path}/_build") and result.status == 0 do
       File.write!("#{otp_app_path}/_build/nerves_env", encode_term(env))
     end
@@ -93,7 +93,7 @@ defmodule Bake.Adapters.Nerves do
     Porcelain.shell(cmd, out: stream)
   end
 
-  def burn(bakefile_path, config, target, otp_name) do
+  def burn(bakefile_path, config, target, otp_name, args) do
     Bake.Shell.info "=> Burning firmware for target #{target}"
     {toolchain_path, system_path} = config_env(bakefile_path, config, target)
     stream = IO.binstream(:standard_io, :line)
@@ -104,8 +104,8 @@ defmodule Bake.Adapters.Nerves do
       {"MIX_ENV", System.get_env("MIX_ENV") || "dev"}
     ]
     fw = "_images/#{otp_name}-#{target}.fw"
-    cmd = "fwup -a -i #{fw} -t complete"
-    Porcelain.shell(cmd, env: env, out: stream)
+    cmd = "fwup -a -i #{fw} -t complete #{args}"
+    Porcelain.shell(cmd, env: env, in: stream, async_in: true, out: stream)
   end
 
   defp remove_newlines(string) do
@@ -132,6 +132,12 @@ defmodule Bake.Adapters.Nerves do
       # The exists. Check to see if it contains a lock for our target
       lock_file = Bake.Config.Lock.read(lock_path)
       lock_targets = lock_file[:targets]
+      target =
+      if is_binary(target) do
+        String.to_atom(target)
+      else
+        target
+      end
       case Keyword.get(lock_targets, target) do
         nil ->
           Bake.Shell.error_exit "You must run bake system get for target #{target} before bake firmware"
