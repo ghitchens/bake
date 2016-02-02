@@ -2,6 +2,8 @@ defmodule Bake.Cli.Burn do
   @menu "burn"
   @switches [target: :string, bakefile: :string]
 
+  require Logger
+
   use Bake.Cli.Menu
 
   def menu do
@@ -11,33 +13,14 @@ defmodule Bake.Cli.Burn do
 
   def main(args) do
     {opts, _, _} = OptionParser.parse(args, switches: @switches)
-    if opts[:target] == nil, do: raise """
-      You must specify a target to burn
-    """
-
-    target = opts[:target]
-    bakefile = opts[:bakefile] || System.cwd! <> "/Bakefile"
-
-    case Bake.Config.read!(bakefile) do
-      {:ok, config} ->
-        case Bake.Config.filter_target(config, target) do
-          [] -> Bake.Shell.info "Bakefile does not contain definition for target #{target}"
-          target_config ->
-            platform = target_config[:platform]
-            |> Atom.to_string
-            |> String.capitalize
-
-            mod = Module.concat(Bake.Adapters, platform)
-
-            otp_name = Path.dirname(bakefile) |> String.split("/") |> List.last
-            #Enum.each(target_config[:target], fn({target, v}) ->
-              mod.burn(target_config, target, otp_name)
-            #end)
-
-        end
-      {:error, _e} ->
-        Bake.Shell.info "No Bakefile Found"
-    end
+    opts = Enum.into(opts, %{})
+    Logger.debug "Opts: #{inspect opts}"
+    {bakefile_path, target_config, target} = bakefile(Map.get(opts, :bakefile), Map.get(opts, :target))
+    platform = target_config[:platform]
+    Logger.debug "Target Config: #{inspect target_config}"
+    otp_name = Path.dirname(bakefile_path) |> String.split("/") |> List.last
+    adapter = adapter(platform)
+    adapter.burn(bakefile_path, target_config, target, otp_name)
   end
 
 end
