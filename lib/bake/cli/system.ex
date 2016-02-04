@@ -101,7 +101,9 @@ defmodule Bake.Cli.System do
           Bake.Shell.info "==> Unpacking system #{username}/#{name}-#{version}"
           File.write!("#{dir}/#{name}-#{version}.tar.gz", tar)
           case System.cmd("tar", ["xf", "#{name}-#{version}.tar.gz"], cd: dir) do
-            {_, 0} -> File.rm_rf("#{dir}/#{name}-#{version}.tar.gz")
+            {_, 0} ->
+              File.rm_rf("#{dir}/#{name}-#{version}.tar.gz")
+              Bake.Config.Lock.update(lock_file, [targets: [{target, ["#{username}/#{name}": version]}]])
             {_error, _code} ->
               File.rm_rf("#{dir}/#{name}-#{version}.tar.gz")
               Bake.Shell.error_exit """

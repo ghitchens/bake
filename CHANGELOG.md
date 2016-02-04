@@ -1,8 +1,12 @@
 # Release Notes
 
+## Bake 0.2.3
+### Bug Fixes
+* update lock file after initial system unpacks
+
 ## Bake 0.2.2
 ### Enhancements
-* Added Bake burn with support from fwup 0.5.1
+* Added Bake burn with support from fwup 0.5.2
 * All unmatched options passed to bake burn will be forwarded to fwup
 
 ### Bug Fixes

@@ -5,7 +5,7 @@ defmodule Bake.Adapter do
   defcallback toolchains_path() :: String.t
 
   defcallback firmware(bakefile_path :: String.t, config :: Bake.Config.t, target :: Atom.t, otp_name :: String.t) :: nil
-  defcallback burn(bakefile_path :: String.t, config :: Bake.Config.t, target :: Atom.t, otp_name :: String.t) :: nil
+  defcallback burn(bakefile_path :: String.t, config :: Bake.Config.t, target :: Atom.t, otp_name :: String.t, args :: String.t) :: nil
   defcallback clean() :: nil
 
 end
