@@ -2,6 +2,7 @@ defmodule Bake.Adapters.Nerves do
   import Bake.Config.Global, only: [encode_term: 1, decode_term: 1, decode_elixir: 1]
   @behaviour Bake.Adapter
 
+  @rebar_url "https://github.com/rebar/rebar/releases/download/2.6.1/rebar"
   @nerves_home System.get_env("NERVES_HOME") || "~/.nerves"
 
   require Logger
@@ -21,6 +22,11 @@ defmodule Bake.Adapters.Nerves do
 
     Bake.Shell.info "=> Building firmware for target #{target}"
     {toolchain_path, system_path} = config_env(bakefile_path, config, target)
+
+    {:ok, system_config} = "#{system_path}/recipe.exs"
+    |> Bake.Config.Recipe.read!
+
+    {_, toolchain_tuple, _} = system_config[:toolchain]
     rel2fw = "#{system_path}/scripts/rel2fw.sh"
     stream = IO.binstream(:standard_io, :line)
     env = [
@@ -28,6 +34,7 @@ defmodule Bake.Adapters.Nerves do
       {"NERVES_TOOLCHAIN", toolchain_path},
       {"NERVES_SYSTEM", system_path},
       {"NERVES_TARGET", to_string(target)},
+      {"REBAR_TARGET_ARCH", toolchain_tuple},
       {"MIX_ENV", System.get_env("MIX_ENV") || "dev"}
     ]
     cmd = """
@@ -43,7 +50,7 @@ defmodule Bake.Adapters.Nerves do
     # to keep the command to bash together.
     cmd = cmd <> """
     mix local.hex --force &&
-    mix local.rebar --force &&
+    mix local.rebar rebar #{@rebar_url} --force &&
     """
 
     #check for the env cache
@@ -94,7 +101,7 @@ defmodule Bake.Adapters.Nerves do
   end
 
   def burn(bakefile_path, config, target, otp_name, args) do
-    Bake.Shell.info "=> Burning firmware for target #{target}"
+    Bake.Shell.info "=> Burning firmware #{otp_name}-#{target}.fw"
     {toolchain_path, system_path} = config_env(bakefile_path, config, target)
     stream = IO.binstream(:standard_io, :line)
     env = [

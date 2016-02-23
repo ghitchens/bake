@@ -1,5 +1,9 @@
 # Release Notes
 
+## Bake 0.2.4
+### Bug Fixes
+* force the install of rebar >= 2.6.0 for use with REBAR_TARGET_ARCH to ensure cross compiling works properly
+
 ## Bake 0.2.3
 ### Bug Fixes
 * update lock file after initial system unpacks
