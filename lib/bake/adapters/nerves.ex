@@ -76,6 +76,7 @@ defmodule Bake.Adapters.Nerves do
 
     cmd = cmd <> """
     mix compile &&
+    mix release.clean &&
     mix release &&
     bash #{rel2fw} rel/#{otp_name} _images/#{otp_name}-#{target}.fw"
     """ |> remove_newlines
