@@ -1,5 +1,9 @@
 # Release Notes
 
+## Bake 0.2.6
+### Bug Fixes
+* added sudo askpass support for using bake burn on linux
+
 ## Bake 0.2.5
 ### Bug Fixes
 * clean the release on every call to `bake firmware` to prevent cache bloat

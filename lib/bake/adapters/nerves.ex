@@ -113,6 +113,15 @@ defmodule Bake.Adapters.Nerves do
     ]
     fw = "_images/#{otp_name}-#{target}.fw"
     cmd = "fwup -a -i #{fw} -t complete #{args}"
+
+    {env, cmd} =
+      case Bake.Utils.host_platform do
+        <<"linux", _ :: binary >> ->
+          sudo_askpass = System.get_env("SUDO_ASKPASS") || "/usr/bin/ssh-askpass"
+          env = [{"SUDO_ASKPASS", sudo_askpass} | env]
+          {env, "sudo " <> cmd}
+        _ -> {env, cmd}
+      end
     Porcelain.shell(cmd, env: env, in: stream, async_in: true, out: stream)
   end
 
