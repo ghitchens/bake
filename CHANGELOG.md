@@ -1,5 +1,7 @@
 # Release Notes
 
+## Bake 0.2.7-dev
+
 ## Bake 0.2.6
 ### Bug Fixes
 * added sudo askpass support for using bake burn on linux
