@@ -17,7 +17,7 @@ defmodule Bake.Adapters.Nerves do
   def systems_path, do: "#{nerves_home}/systems/" |> Path.expand
   def toolchains_path, do: "#{nerves_home}/toolchains/" |> Path.expand
 
-  def firmware(bakefile_path, config, target, otp_name) do
+  def firmware(bakefile_path, config, target, otp_name, opts \\ []) do
     otp_app_path = Path.dirname(bakefile_path)
 
     Bake.Shell.info "=> Building firmware for target #{target}"
@@ -27,7 +27,7 @@ defmodule Bake.Adapters.Nerves do
     |> Bake.Config.Recipe.read!
 
     {_, toolchain_tuple, _} = system_config[:toolchain]
-    rel2fw = "#{system_path}/scripts/rel2fw.sh"
+    rel2fw_script = "#{system_path}/scripts/rel2fw.sh"
     stream = IO.binstream(:standard_io, :line)
     env = [
       {"NERVES_APP", otp_app_path},
@@ -37,18 +37,15 @@ defmodule Bake.Adapters.Nerves do
       {"REBAR_TARGET_ARCH", toolchain_tuple},
       {"MIX_ENV", System.get_env("MIX_ENV") || "dev"}
     ]
-    cmd = """
-    bash -c "
-    source #{system_path}/nerves-env.sh || exit 1
-    """
-    result = Porcelain.shell(cmd <> ~s("), env: env, out: nil)
+
+    result = Porcelain.shell(nerves_env(system_path), env: env, out: nil)
 
     if result.status != 0,
       do: Bake.Shell.error_exit "Nerves could not initialize the environment. Please fix the issue and try again"
     # The Nerves scripts require bash. The native shell could be sh, so
     # invoke bash for the rest of the script. Note the single double-quote
     # to keep the command to bash together.
-    cmd = cmd <> """
+    cmd = """
     mix local.hex --force &&
     mix local.rebar rebar #{@rebar_url} --force &&
     """
@@ -73,20 +70,35 @@ defmodule Bake.Adapters.Nerves do
     else
       cmd = clean_target(cmd)
     end
-
+    verbosity = Map.get(opts, :verbosity, "normal")
     cmd = cmd <> """
     mix compile &&
     mix release.clean &&
-    mix release &&
-    bash #{rel2fw} rel/#{otp_name} _images/#{otp_name}-#{target}.fw"
+    mix release --verbosity=#{verbosity}
     """ |> remove_newlines
 
-
-    result = Porcelain.shell(cmd, dir: otp_app_path, env: env, in: stream, async_in: true, out: stream)
+    IO.puts "Cmd: #{inspect cmd}"
+    porcelain_opts = [dir: otp_app_path, env: env, in: stream, async_in: true, out: stream]
+    compile_result =
+      nerves_env(cmd, system_path)
+      |> Porcelain.shell(porcelain_opts)
     if File.dir?("#{otp_app_path}/_build") and result.status == 0 do
-      File.write!("#{otp_app_path}/_build/nerves_env", encode_term(env))
-    end
+      rel2fw_result =
+        rel2fw(rel2fw_script, otp_app_path, otp_name, target)
+        |> nerves_env(system_path)
+        |> Porcelain.shell(porcelain_opts)
+      case rel2fw_result do
+        %{status: 0} ->
+          File.write!("#{otp_app_path}/_build/nerves_env", encode_term(env))
+        _ ->
+          rel2fw_v1(rel2fw_script, otp_app_path, otp_name, target)
+          |> nerves_env(system_path)
+          |> Porcelain.shell(porcelain_opts)
+      end
 
+    else
+      Bake.Shell.info "Release Failed"
+    end
   end
 
   def clean do
@@ -204,5 +216,38 @@ defmodule Bake.Adapters.Nerves do
 
   defp to_keyword_list(build_env) do
     Enum.map(build_env, fn {k, v} -> {String.to_atom(k), v} end)
+  end
+
+  defp rel2fw(script, otp_app_path, otp_app, target) do
+    """
+    bash #{script} -f _images/#{otp_app}-#{target}.fw
+    """ <>
+    if File.dir?("#{otp_app_path}/rel/rootfs-additions") do
+      "-a rel/rootfs-additions "
+    else
+      ""
+    end <>
+    """
+    rel/#{otp_app}
+    """ |> remove_newlines
+  end
+
+  defp rel2fw_v1(script, _otp_app_path, otp_app, target) do
+    Bake.Shell.warn """
+    Using rel2fw protocol v1, the following services are unavailable:
+    rootfs-additions, custom fwup.conf
+    """
+
+    """
+    bash #{script} rel/#{otp_app} _images/#{otp_app}-#{target}.fw
+    """ |> remove_newlines
+  end
+
+  defp nerves_env(script \\ "", system_path) do
+    cmd = """
+    bash -c "
+    source #{system_path}/nerves-env.sh || exit 1
+    #{script} "
+    """
   end
 end
