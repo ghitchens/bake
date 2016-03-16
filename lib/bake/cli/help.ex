@@ -13,6 +13,9 @@ defmodule Bake.Cli.Help do
     """
   end
 
+  def main([]) do
+    Bake.Shell.info Bake.Cli.menu
+  end
   def main(args) do
     {_opts, cmd, _} = OptionParser.parse(args, switches: @switches)
     mod =

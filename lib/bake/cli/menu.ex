@@ -10,6 +10,7 @@ defmodule Bake.Cli.Menu do
 
       def invalid_cmd,      do: Bake.Shell.info menu
       def invalid_cmd(""),  do: Bake.Shell.info menu
+      def invalid_cmd([]),  do: Bake.Shell.info menu
       def invalid_cmd(cmd) do
         mod = Atom.to_string(__MODULE__)
           |> String.split(".")
