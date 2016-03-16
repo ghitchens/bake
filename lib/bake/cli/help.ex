@@ -15,16 +15,11 @@ defmodule Bake.Cli.Help do
 
   def main(args) do
     {_opts, cmd, _} = OptionParser.parse(args, switches: @switches)
-    mod =
-      case List.first(cmd) do
-        nil -> Bake.Cli
-        mod ->
-          mod = mod
-          |> String.capitalize
-          |> String.to_atom
-          Module.concat(Bake.Cli, mod)
-      end
-      
+    mod = List.first(cmd)
+    |> String.capitalize
+    |> String.to_atom
+
+    mod = Module.concat(Bake.Cli, mod)
     try do
       help =
       case Kernel.apply(mod, :menu, []) do
