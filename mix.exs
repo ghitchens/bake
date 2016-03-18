@@ -26,7 +26,6 @@ defmodule Bake.Mixfile do
       {:sshex, "~> 1.3"},
       {:porcelain, "~> 2.0"},
       {:sweet_xml, "~> 0.5"},
-      {:httpoison, "~> 0.7"},
       {:ex_aws, "~> 0.4.11"},
       {:table_rex, "~> 0.8"},
       {:phoenix_channel_client, github: "mobileoverlord/phoenix_channel_client"}
