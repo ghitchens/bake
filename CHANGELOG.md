@@ -1,6 +1,9 @@
 # Release Notes
 
-## Bake 0.2.7-dev
+## Bake 0.2.7
+### Bug Fixes
+* Check for gstat to be installed before allowing bake firmware
+* Enforce firmware is stored in the firmware dir
 
 ## Bake 0.2.6
 ### Bug Fixes
