@@ -20,6 +20,14 @@ defmodule Bake.Adapters.Nerves do
   def firmware(bakefile_path, config, target, otp_name, opts \\ []) do
     otp_app_path = Path.dirname(bakefile_path)
 
+    unless Bake.Utils.installed?("gstat") do
+      Bake.Shell.error_exit """
+      merge-squashfs: ERROR: Please install gstat first
+      For example:
+        brew install coreutils
+      """
+    end
+
     Bake.Shell.info "=> Building firmware for target #{target}"
     {toolchain_path, system_path} = config_env(bakefile_path, config, target)
 
@@ -220,15 +228,7 @@ defmodule Bake.Adapters.Nerves do
 
   defp rel2fw(script, otp_app_path, otp_app, target) do
     """
-    bash #{script} -f _images/#{otp_app}-#{target}.fw
-    """ <>
-    if File.dir?("#{otp_app_path}/rel/rootfs-additions") do
-      "-a rel/rootfs-additions "
-    else
-      ""
-    end <>
-    """
-    rel/#{otp_app}
+    bash #{script} -f _images/#{otp_app}-#{target}.fw rel/#{otp_app}
     """ |> remove_newlines
   end
 

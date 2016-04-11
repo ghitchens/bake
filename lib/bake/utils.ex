@@ -167,4 +167,11 @@ defmodule Bake.Utils do
     |> String.downcase
   end
 
+  def installed?(utility) do
+    case System.cmd("which", [utility]) do
+      {_, 0} -> true
+      _ -> false
+    end
+  end
+
 end

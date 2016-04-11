@@ -50,7 +50,7 @@ defmodule Bake.Api do
   end
 
   def url(path) do
-    Application.get_env(:bake, :api_host) || System.get_env("BAKE_API_URL") <> path 
+    (Application.get_env(:bake, :api_host) || System.get_env("BAKE_API_URL")) <> path
   end
 
   def auth(key: secret) do
