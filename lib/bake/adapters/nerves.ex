@@ -20,13 +20,7 @@ defmodule Bake.Adapters.Nerves do
   def firmware(bakefile_path, config, target, otp_name, opts \\ []) do
     otp_app_path = Path.dirname(bakefile_path)
 
-    unless Bake.Utils.installed?("gstat") do
-      Bake.Shell.error_exit """
-      merge-squashfs: ERROR: Please install gstat first
-      For example:
-        brew install coreutils
-      """
-    end
+    check_host_tools(:os.type)
 
     Bake.Shell.info "=> Building firmware for target #{target}"
     {toolchain_path, system_path} = config_env(bakefile_path, config, target)
@@ -250,4 +244,15 @@ defmodule Bake.Adapters.Nerves do
     #{script} "
     """
   end
+
+  defp check_host_tools({_, :darwin}) do
+    unless Bake.Utils.installed?("gstat") do
+      Bake.Shell.error_exit """
+      merge-squashfs: ERROR: Please install gstat first
+      For example:
+        brew install coreutils
+      """
+    end
+  end
+  defp check_host_tools({_, _}), do: nil
 end

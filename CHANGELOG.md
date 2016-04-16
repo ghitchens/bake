@@ -1,5 +1,9 @@
 # Release Notes
 
+## Bake 0.2.8
+### Bug Fixes
+* Fixed host specific platform checks
+
 ## Bake 0.2.7
 ### Bug Fixes
 * Check for gstat to be installed before allowing bake firmware
