@@ -1,3 +1,7 @@
+**This is archived for historical purposes only.**  
+
+See the current nerves-project for more current ways of cross-compiling firmware using a docker-based build environment.
+
 # Bake
 
 Bake is an elixir escript which produces a command line interface tool for working with bakeware.
